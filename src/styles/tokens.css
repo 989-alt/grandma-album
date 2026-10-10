@@ -1,0 +1,105 @@
+/* docs/grandma-album/tokens.json — themes.sepia + size·typography.size.
+   이름 = tokens.json 경로를 '-' 로 이은 것(color.semantic 접두 생략, 예 photo.sepia → --photo-sepia).
+   hex 는 이 파일에만 둔다. @font-face 는 T07(src/styles/fonts.css). */
+:root {
+  /* 색 */
+  --background: #2B2118;
+  --foreground: #F3E9D6;
+  --card: #F7EEDC;
+  --card-foreground: #3B2A1E;
+  --popover: #FBF5E8;
+  --popover-foreground: #3B2A1E;
+  --primary: #5B6E8C;
+  --primary-foreground: #FBF5E8;
+  --secondary: #E6D3B3;
+  --secondary-foreground: #3B2A1E;
+  --muted: #E9DCC4;
+  --muted-foreground: #6E5A45;
+  --accent: #A67C52;
+  --accent-foreground: #FBF5E8;
+  --destructive: #9A4A3B;
+  --destructive-foreground: #FBF5E8;
+  --border: #8C6B4A;
+  --input: #FBF5E8;
+  --ring: #5B6E8C;
+  --surface-album: #5A3A22;
+  --surface-album-foreground: #F3E9D6;
+  --surface-page: #EFE4CF;
+  --surface-slot: #E1D2B6;
+  --photo-sepia: #C9A574;
+  --photo-frame: #FFF8EA;
+  --photo-back: #F2E6CF;
+  --photo-back-foreground: #3B2A1E;
+  --family-with: #5B6E8C;
+  --family-apart: #B8A98F;
+  --family-unknown: #D9CDB4;
+  --stat-family: #9A4A3B;
+  --stat-home: #A67C52;
+  --stat-third: #5B6E8C;
+  --judge-correct: #4F7A5A;
+  --judge-correct-foreground: #FBF5E8;
+  --judge-wrong: #9A4A3B;
+  --judge-wrong-foreground: #FBF5E8;
+  --locked: #B8A98F;
+  --first-color: #6FA3A8;
+
+  /* 서체 (이름+폴백만) */
+  --font-display: 'Gowun Batang', serif;
+  --font-body: 'Gowun Dodum', sans-serif;
+  --font-hand: 'Nanum Pen Script', cursive;
+
+  /* 크기 */
+  --size-tap-min: 48px;
+  --size-stage-w: 1024px;
+  --size-stage-h: 768px;
+  --size-photo-w: 560px;
+  --size-photo-h: 380px;
+  --size-sm: 16px;
+  --size-base: 20px;
+  --size-lg: 24px;
+  --size-xl: 30px;
+  --size-2xl: 40px;
+  --size-3xl: 56px;
+
+  /* 모서리·그림자 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+  --shadow-card: 0 4px 0 #B89C72, 0 8px 16px rgba(43,33,24,.25);
+  --shadow-press: 0 1px 0 #B89C72;
+  --shadow-photo: 0 2px 0 #FFF8EA, 0 6px 14px rgba(43,33,24,.35);
+
+  /* 시안 2-세피아-kit.css 이름 별칭 — kit CSS 를 그대로 옮겨 쓸 수 있게.
+     단 kit 의 --muted(글자색 #6E5A45)는 위 --muted(바탕)와 겹쳐 별칭 없음 → --muted-foreground 를 쓴다. */
+  --album-leather: var(--surface-album);
+  --page-cream: var(--surface-page);
+  --slot-tan: var(--surface-slot);
+  --photo-white: var(--photo-frame);
+  --sepia-wash: var(--photo-sepia);
+  --ink-brown: var(--card-foreground);
+  --indigo: var(--primary);
+  --brass: var(--accent);
+  --rust: var(--destructive);
+  --stamp-green: var(--judge-correct);
+  --night: var(--background);
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-body);
+  --font-pen: var(--font-hand);
+  --size-narration: 24px;
+  --size-title: 30px;
+  --size-btn: 22px;
+  --size-body: 20px;
+  --size-label: 16px;
+  --size-card: 28px;
+  --size-caption: 20px;
+  --size-back: 30px;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: var(--size-base);
+}
