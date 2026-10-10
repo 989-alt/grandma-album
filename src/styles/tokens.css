@@ -69,31 +69,6 @@
   --shadow-card: 0 4px 0 #B89C72, 0 8px 16px rgba(43,33,24,.25);
   --shadow-press: 0 1px 0 #B89C72;
   --shadow-photo: 0 2px 0 #FFF8EA, 0 6px 14px rgba(43,33,24,.35);
-
-  /* 시안 2-세피아-kit.css 이름 별칭 — kit CSS 를 그대로 옮겨 쓸 수 있게.
-     단 kit 의 --muted(글자색 #6E5A45)는 위 --muted(바탕)와 겹쳐 별칭 없음 → --muted-foreground 를 쓴다. */
-  --album-leather: var(--surface-album);
-  --page-cream: var(--surface-page);
-  --slot-tan: var(--surface-slot);
-  --photo-white: var(--photo-frame);
-  --sepia-wash: var(--photo-sepia);
-  --ink-brown: var(--card-foreground);
-  --indigo: var(--primary);
-  --brass: var(--accent);
-  --rust: var(--destructive);
-  --stamp-green: var(--judge-correct);
-  --night: var(--background);
-  --font-serif: var(--font-display);
-  --font-sans: var(--font-body);
-  --font-pen: var(--font-hand);
-  --size-narration: 24px;
-  --size-title: 30px;
-  --size-btn: 22px;
-  --size-body: 20px;
-  --size-label: 16px;
-  --size-card: 28px;
-  --size-caption: 20px;
-  --size-back: 30px;
 }
 
 body {

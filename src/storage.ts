@@ -5,8 +5,6 @@ export const KEY = 'grandma-album/v1';
 // localStorage 가 throw 하면(사생활 모드·용량 초과) 이 세션은 메모리에만 둔다.
 let useMem = false;
 let mem: string | null = null;
-/** 마지막 load() 가 깨진 저장본을 지웠는가 — 화면이 토스트 한 줄을 띄울 때 쓴다. */
-export let dropped = false;
 
 function get(): string | null {
   if (!useMem) try { return localStorage.getItem(KEY); } catch { useMem = true; }
@@ -27,15 +25,16 @@ export function save(state: State): void {
   set(JSON.stringify(state));
 }
 
-export function load(): State | null {
-  dropped = false;
+/** dropped = 깨진 저장본을 지웠음(화면이 토스트 한 줄을 띄운다). */
+export function load(): { state: State | null; dropped: boolean } {
   const raw = get();
-  if (raw === null) return null;
+  if (raw === null) return { state: null, dropped: false };
   try {
     const s = JSON.parse(raw);
-    if (s?.v === 1) return s as State;
+    if (s?.v === 1 && typeof s.chapter === 'number' && typeof s.sceneIdx === 'number' && s.stats && s.flags) {
+      return { state: s as State, dropped: false };
+    }
   } catch { /* 아래에서 삭제 */ }
   clear();
-  dropped = true;
-  return null;
+  return { state: null, dropped: true };
 }

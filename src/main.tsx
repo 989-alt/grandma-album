@@ -1,7 +1,7 @@
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import './styles/tokens.css';
-import { clear, dropped, load } from './storage';
+import { clear, load } from './storage';
 import { Title } from './screens/Title';
 import { Resume } from './screens/Resume';
 
@@ -9,7 +9,7 @@ import { Resume } from './screens/Resume';
 type Screen = 'title' | 'resume' | 'album';
 
 function App() {
-  const [saved] = useState(load);
+  const [{ state: saved, dropped }] = useState(load);
   const [toast, setToast] = useState(dropped);
   const [screen, setScreen] = useState<Screen>('title');
 

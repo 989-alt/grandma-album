@@ -35,14 +35,14 @@ describe('storage', () => {
 
   it('save → load 왕복, 키는 grandma-album/v1 하나만', async () => {
     const st = await fresh();
-    expect(st.load()).toBeNull();
+    expect(st.load()).toEqual({ state: null, dropped: false });
     st.save(state());
     expect(ls.length).toBe(1);
     expect(ls.key(0)).toBe('grandma-album/v1');
-    expect(st.load()).toEqual(state());
+    expect(st.load().state).toEqual(state());
     st.save({ ...state(), sceneIdx: 4 });
     expect(ls.length).toBe(1);
-    expect(st.load()?.sceneIdx).toBe(4);
+    expect(st.load().state?.sceneIdx).toBe(4);
   });
 
   it('clear 후 load 는 null', async () => {
@@ -50,43 +50,40 @@ describe('storage', () => {
     st.save(state());
     st.clear();
     expect(ls.length).toBe(0);
-    expect(st.load()).toBeNull();
-    expect(st.dropped).toBe(false);
+    expect(st.load()).toEqual({ state: null, dropped: false });
   });
 
-  it.each(['{"v":1,', 'not json', '', 'null', '42', '"str"', '{}', JSON.stringify({ ...state(), v: 0 }), JSON.stringify({ ...state(), v: 2 })])(
-    '깨진 저장본 %j → 삭제 후 null, dropped=true', async (bad) => {
+  it.each(['{"v":1,', 'not json', '', 'null', '42', '"str"', '{}', JSON.stringify({ ...state(), v: 0 }), JSON.stringify({ ...state(), v: 2 }), '{"v":1}', '{"v":1,"chapter":"x"}', JSON.stringify({ ...state(), stats: undefined }), JSON.stringify({ ...state(), flags: null })])(
+    '깨진 저장본 %j → 삭제 후 state null, dropped true', async (bad) => {
       const st = await fresh();
       ls.setItem('grandma-album/v1', bad);
-      expect(st.load()).toBeNull();
-      expect(st.dropped).toBe(true);
+      expect(st.load()).toEqual({ state: null, dropped: true });
       expect(ls.length).toBe(0);
-      expect(st.load()).toBeNull();
-      expect(st.dropped).toBe(false);
+      expect(st.load()).toEqual({ state: null, dropped: false });
     });
 
   it('localStorage 가 throw → 예외 없이 메모리 폴백으로 진행', async () => {
     vi.stubGlobal('localStorage', throwing());
     const st = await fresh();
     expect(() => st.load()).not.toThrow();
-    expect(st.load()).toBeNull();
+    expect(st.load().state).toBeNull();
     expect(() => st.save(state())).not.toThrow();
-    expect(st.load()).toEqual(state());
+    expect(st.load().state).toEqual(state());
     expect(() => st.clear()).not.toThrow();
-    expect(st.load()).toBeNull();
+    expect(st.load().state).toBeNull();
   });
 
-  it('localStorage 자체가 없음(접근 시 ReferenceError) → 메모리 폴백', async () => {
+  it('localStorage 가 undefined(메서드 호출 시 TypeError) → 메모리 폴백', async () => {
     vi.stubGlobal('localStorage', undefined);
     const st = await fresh();
     expect(() => st.save(state())).not.toThrow();
-    expect(st.load()).toEqual(state());
+    expect(st.load().state).toEqual(state());
   });
 
   it('setItem 만 throw(용량 초과) → 저장은 메모리로, 예외 없음', async () => {
     vi.stubGlobal('localStorage', { ...ls, getItem: ls.getItem, setItem: () => { throw new DOMException('full', 'QuotaExceededError'); } });
     const st = await fresh();
     expect(() => st.save(state())).not.toThrow();
-    expect(st.load()).toEqual(state());
+    expect(st.load().state).toEqual(state());
   });
 });
