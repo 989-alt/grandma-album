@@ -1,0 +1,1 @@
+Hopeful dawn theme for a children's history story game, the moment color returns to a sepia photograph. Bright strings swelling gently, a clear oboe or wooden flute melody, soft glockenspiel, 104 BPM, major key, opening from a hushed start to a warm radiant chorus. Seamlessly loopable, about 60 seconds. Instrumental only, no vocals.

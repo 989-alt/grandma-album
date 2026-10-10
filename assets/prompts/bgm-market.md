@@ -1,0 +1,1 @@
+Warm, nostalgic Korean folk market theme for a children's history story game set in the 1880s. Traditional Korean percussion (janggu, buk) with a gentle haegeum melody and plucked gayageum, light wooden flute (daegeum) answering phrases, 96 BPM, bright pentatonic mode, bustling but soft like a faded memory. Seamlessly loopable, about 60 seconds. Instrumental only, no vocals.

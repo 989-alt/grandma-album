@@ -1,0 +1,1 @@
+Quiet, intimate lamplight theme for a children's history story game, a grandmother turning the pages of an old photo album. Solo gayageum with slow arpeggios, a low sustained cello pad, faint warm room tone, 70 BPM, minor pentatonic with a tender resolve, sparse and unhurried, melancholy but safe. Seamlessly loopable, about 60 seconds. Instrumental only, no vocals.
