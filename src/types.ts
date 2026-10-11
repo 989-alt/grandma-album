@@ -13,13 +13,16 @@ export interface Choice {
   lock?: { stat: StatKey; min: number };
   flag?: keyof Flags;
   setFamily?: { id: string; status: FamilyStatus };
+  risk?: true;
+  /** 이 플래그가 없으면 카드를 숨긴다(엔진 visibleChoices). */
+  requiresFlag?: keyof Flags;
 }
 
 export interface Spot { x: number; y: number; r: number; label: string }
 
 export type Back =
-  | { type: 'initial'; prompt: string; answer: string; hint: string; source: number[] }
-  | { type: 'ox'; prompt: string; answer: boolean; hint: string; source: number[] };
+  | { type: 'initial'; prompt: string; answer: string; hint: string; keys: string[]; source: number[] }
+  | { type: 'ox'; prompt: string; answer: boolean; fix: string; source: number[] };
 
 export interface Scene {
   id: string;
@@ -28,9 +31,14 @@ export interface Scene {
   dialogue: string[];
   source: number[];
   choices?: Choice[];
-  bundle?: { candidates: string[]; slots: 3 };
-  compare?: { a: string; b: string; spots: Spot[] };
-  letter?: { lines: string[]; moods: string[] };
+  /** 장면에 들어오면 켜지는 플래그(4-1 first_color). */
+  autoFlag?: keyof Flags;
+  /** 선택과 무관한 장면 사건(2-4 삼촌, 5-6 아버지). */
+  event?: { setFamily: { id: string; status: FamilyStatus } };
+  /** requiresFlag: 후보 → 그 후보를 허용하는 플래그. */
+  bundle?: { candidates: string[]; slots: 3; requiresFlag: Record<string, keyof Flags> };
+  compare?: { a: string; b: string; spots: Spot[]; graph?: { years: number[]; tenant: number[] } };
+  letter?: { lines: string[]; moods: { id: string; text: string }[] };
   back: Back;
 }
 
@@ -42,14 +50,18 @@ export interface Chapter {
   family: FamilyMember[];
   thirdAxis: ThirdAxis;
   scenes: Scene[];
+  /** 장 끝 할머니 한 줄. */
+  outro?: string;
 }
+
+export type ClosingKey = 'brother-with' | 'brother-apart';
 
 export interface Term { word: string; meaning: string; source: number[] }
 
 export interface Content {
   chapters: Chapter[];
   terms: Term[];
-  closing: { variants: Record<FamilyStatus, string> };
+  closing: { variants: Record<ClosingKey, [string, string]> };
 }
 
 export interface Flags { spoon: boolean; spoon_hidden: boolean; first_color: boolean }
