@@ -89,6 +89,10 @@ describe('Compare (3-2)', () => {
     fire(after, 'click', at(0.05, 0.95));
     expect(log.states).toHaveLength(0);
     expect(all(hasClass('ripple'))).toHaveLength(1);
+    const k1 = all(hasClass('ripple'))[0];
+    fire(after, 'click', at(0.06, 0.94)); // 연속 오답 → 새 잔물결(재시작)
+    expect(all(hasClass('ripple'))).toHaveLength(1);
+    expect(all(hasClass('ripple'))[0]).not.toBe(k1);
     expect(all((n) => n.localName === 'img' && hasClass('mark')(n) && !hasClass('abs')(n))).toHaveLength(0);
     expect(all(hasClass('found'))).toHaveLength(0);
   });
@@ -111,14 +115,17 @@ describe('Compare (3-2)', () => {
     expect(last(log).compareHits['3-2']).toBe(3);
     expect(all(hasClass('found'))).toHaveLength(3);
     expect(log.done).toBe(0);
+    fire(stop(), 'click'); // 자동 진행 대기 중 수동 탭
     act(() => { vi.advanceTimersByTime(1000); });
     expect(log.done).toBe(1);
   });
 
-  it('2-4 그래프: after 쪽에 막대 2묶음×3해', () => {
+  it('2-4 그래프: 단일 계열, before 1막대·after 3막대', () => {
     mount(<Compare state={initialState(0)} scene={scene('2-4')} onChange={() => {}} onDone={() => {}} />);
     const after = one((n) => n.attrs['data-testid'] === 'after');
-    expect(all(hasClass('bar'), after)).toHaveLength(6);
+    const bars = (n: Node0) => all((x) => x.localName === 'i', n);
+    expect(bars(after)).toHaveLength(3);
+    expect(bars(root).length - 3).toBe(1);
   });
 });
 

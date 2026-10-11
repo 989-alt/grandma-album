@@ -20,15 +20,20 @@ export function Compare({ state, scene, srcA, srcB, onChange, onDone }: {
   // 연타가 부모 재렌더보다 빠를 수 있어 최신 found·state 를 ref 로 들고 간다
   const foundRef = useRef<number[]>([]);
   const cur = useRef(state);
+  const doneRef = useRef(false);
+  const rippleK = useRef(0);
   const seen = useRef(state);
   if (seen.current !== state) { seen.current = state; cur.current = state; }
   const all = spots.length > 0 && found.length === spots.length;
 
   useEffect(() => {
     if (!all) return;
-    const t = setTimeout(onDone, AUTO_MS);
+    const t = setTimeout(finish, AUTO_MS);
     return () => clearTimeout(t);
   }, [all]);
+
+  // 자동 진행 대기 중 '그만 보기'를 눌러도 onDone 은 한 번만
+  const finish = () => { if (!doneRef.current) { doneRef.current = true; onDone(); } };
 
   const tap = (e: MouseEvent) => {
     if (foundRef.current.length === spots.length) return;
@@ -36,7 +41,7 @@ export function Compare({ state, scene, srcA, srcB, onChange, onDone }: {
     const x = (e.clientX - r.left) / r.width;
     const y = (e.clientY - r.top) / r.height;
     const res = compareHit(cur.current, scene, x, y, foundRef.current);
-    if (!res.hit) { setRipple({ x, y, k: (ripple?.k ?? 0) + 1 }); return; }
+    if (!res.hit) { setRipple({ x, y, k: ++rippleK.current }); return; }
     foundRef.current = [...foundRef.current, res.spotIdx];
     cur.current = res.state;
     setFound(foundRef.current);
@@ -69,7 +74,7 @@ export function Compare({ state, scene, srcA, srcB, onChange, onDone }: {
         <img key={i} class={i < found.length ? 'mark abs found' : 'mark faint abs'} src={i < found.length ? stampOk : stampRing} alt=""
           style={{ left: `${550 + 64 * i}px`, top: '560px' }} />
       ))}
-      <button type="button" class="key wide abs" style={{ left: '822px', top: '556px' }} disabled={found.length === 0} onClick={onDone}>
+      <button type="button" class="key wide abs" style={{ left: '822px', top: '556px' }} disabled={found.length === 0} onClick={finish}>
         <span>그만 보기</span>
       </button>
     </div>

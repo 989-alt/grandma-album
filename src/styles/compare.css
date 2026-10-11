@@ -49,15 +49,10 @@
 .gx .ripple { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; border: 3px solid var(--photo-frame); border-radius: 50%; pointer-events: none; animation: gx-ripple .4s ease-out forwards; }
 @keyframes gx-ripple { from { transform: scale(.2); opacity: .9; } to { transform: scale(1.4); opacity: 0; } }
 
-/* ── 그래프(2-4): DOM 막대, 색 = 살림(자기 땅)·가족(빌린 땅) 토큰 ── */
-.gx .graph { position: relative; display: flex; width: 100%; height: 100%; background: var(--photo-frame); }
-.gx .graph .grp { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 6px 8px 0; }
-.gx .graph .grp > b { font: 700 var(--size-sm)/1 var(--font-body); }
-.gx .graph .bars { flex: 1; display: flex; align-items: flex-end; gap: 8px; width: 100%; justify-content: center; }
-.gx .graph .bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 34px; height: 100%; font: 700 var(--size-sm)/1 var(--font-body); }
-.gx .graph .bar i { display: block; width: 100%; margin-top: 2px; border: 1.5px solid var(--card-foreground); }
-.gx .graph .own i { background: var(--stat-home); }
-.gx .graph .tenant i { background: var(--stat-family); }
+/* ── 그래프(2-4): DOM 막대 단일 계열, 색 = 가족 축 토큰 ── */
+.gx .graph { position: relative; display: flex; align-items: flex-end; justify-content: space-around; width: 100%; height: 100%; padding: 12px 16px 0; background: var(--photo-frame); }
+.gx .graph .bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 56px; height: 100%; font: 700 var(--size-sm)/1 var(--font-body); }
+.gx .graph .bar i { display: block; width: 100%; margin-bottom: 2px; border: 1.5px solid var(--card-foreground); background: var(--stat-family); }
 
 /* ── 편지 ── */
 .gx .letter { display: flex; flex-direction: column; justify-content: flex-start; overflow: auto; }
