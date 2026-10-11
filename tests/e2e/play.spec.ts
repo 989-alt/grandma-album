@@ -185,6 +185,36 @@ test('(d) 틀린 문제 0 → "모두 맞았어요"', async ({ page }) => {
   await expect(page.getByTestId('r-rate')).toHaveText('100% (30/30)');
 });
 
+test('(d2) 30문항 모두 오답 → 결과 틀린 문제 30칸 전부 무대 안, 칩 44px 이상, 마지막 칩 탭 가능', async ({ page }) => {
+  const done = ALL_SCENES.filter((sc) => !sc.id.startsWith('6-'));
+  const st = {
+    v: 1, chapter: 6, sceneIdx: 0, stats: { family: 2, home: 2, third: 2 },
+    family: { father: 'apart', mother: 'with', brother: 'with', okbun: 'with', little: 'with' },
+    flags: { spoon: true, spoon_hidden: false, first_color: true }, bundle: ['bundle', 'book', 'medicine'],
+    answers: done.map((sc) => ({ sceneId: sc.id, correct: false, retried: sc.id.endsWith('-1') })),
+    retryQueue: [], compareHits: {}, letterMoods: [], startedAt: 0, playMs: 0,
+  };
+  await page.goto('/');
+  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, JSON.stringify(st)]);
+  await page.reload();
+  await button(page, '사진첩 열기').click();
+  await page.getByRole('button', { name: /^이어하기/ }).click();
+  await drive(page, new Set(ALL_SCENES.map((sc) => sc.id)), () => visible(page, '[data-screen="result"]'));
+  const chips = page.getByTestId('r-wrong').locator('button');
+  await expect(chips).toHaveCount(30);
+  for (const b of await chips.all()) {
+    const r = (await b.boundingBox())!;
+    expect(r.width).toBeGreaterThanOrEqual(44);
+    expect(r.height).toBeGreaterThanOrEqual(44);
+    expect(r.x).toBeGreaterThanOrEqual(0);
+    expect(r.x + r.width).toBeLessThanOrEqual(1024);
+    expect(r.y + r.height).toBeLessThanOrEqual(768);
+  }
+  await page.screenshot({ path: '../harness/state/grandma-album/reports/T12-result-30.png' });
+  await button(page, '6-2 사진 뒷면 다시 보기').click();
+  await expect(page.locator('.nameplate')).toContainText('6-2');
+});
+
 test('(e) 키보드만으로 비교 1장면 — Tab·Enter', async ({ page }) => {
   await page.goto('/?screen=scene&id=1-3');
   await drive(page, new Set(), () => visible(page, '.screen-compare')); // 비교 화면까지는 클릭으로

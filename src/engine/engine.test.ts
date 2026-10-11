@@ -160,6 +160,11 @@ describe('answerBack · retryAt', () => {
     expect(retryAt(s0(), '1')).toBeNull();
     expect(retryAt(st, '2')!.sceneId).toBe('2-1');
   });
+  it('모르는 id(답한 적 없는 문항)는 건너뜀: 없으면 null, 뒤에 유효 문항이 있으면 그것', () => {
+    expect(retryAt({ ...s0(), retryQueue: ['1-999'] }, '1')).toBeNull();
+    const st = answerBack(s0(), scene('1-2'), wrongBack('1-2')).state;
+    expect(retryAt({ ...st, retryQueue: ['1-999', '1-2'] }, '1')!.sceneId).toBe('1-2');
+  });
 });
 
 describe('보따리', () => {

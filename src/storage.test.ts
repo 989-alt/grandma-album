@@ -21,8 +21,8 @@ const state = (): State => ({
   v: 1, chapter: 3, sceneIdx: 0, stats: { family: 2, home: 1, third: 3 },
   family: { father: 'with', brother: 'unknown' },
   flags: { spoon: true, spoon_hidden: false, first_color: false },
-  bundle: ['spoon', 'cloth', 'photo'], answers: [{ sceneId: '1-1', correct: true, retried: false }],
-  retryQueue: ['2-3'], compareHits: { '4-1': 2 }, letterMoods: ['hope'], startedAt: 0, playMs: 1234,
+  bundle: ['spoon', 'book', 'photo'], answers: [{ sceneId: '1-1', correct: true, retried: false }],
+  retryQueue: ['2-3'], compareHits: { '4-1': 2 }, letterMoods: ['return'], startedAt: 0, playMs: 1234,
 });
 
 // 모듈 상태(메모리 폴백)를 테스트마다 새로 시작
@@ -98,6 +98,12 @@ describe('storage', () => {
     ['compareHits 문자열', { compareHits: { '4-1': 'x' } }],
     ['family 낯선 값', { family: { father: 'dead' } }],
     ['stats 범위 밖', { stats: { family: 4, home: 1, third: 3 } }],
+    ['retryQueue 없는 장면', { retryQueue: ['1-999'] }],
+    ['answers 없는 장면', { answers: [{ sceneId: '9-9', correct: false, retried: false }] }],
+    ['bundle 후보 밖', { bundle: ['flag'] }],
+    ['letterMoods 5-5 밖', { letterMoods: ['x'] }],
+    ['compareHits 비교 장면 아님', { compareHits: { '1-1': 1 } }],
+    ['family 그 장 가족 밖', { family: { uncle: 'apart' } }],
   ])('원소 검증 %s → 처음부터', async (_n, patch) => {
     const st = await fresh();
     ls.setItem('grandma-album/v1', JSON.stringify({ ...state(), ...patch }));

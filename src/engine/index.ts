@@ -63,9 +63,10 @@ export function answerBack(state: State, scene: Scene, answer: string[] | boolea
   return { correct, state: { ...state, answers: [...state.answers, { sceneId: scene.id, correct, retried: false }], retryQueue: queue } };
 }
 
-/** 장 끝 재출제 문항 1개. 꺼낸 문항은 큐에서 빠지고 retried=true → 다시 나오지 않는다. */
+/** 장 끝 재출제 문항 1개. 꺼낸 문항은 큐에서 빠지고 retried=true → 다시 나오지 않는다.
+ *  answers 에 없는 id(answerBack 이 넣지 않은 것 = 깨진 저장본)는 건너뛴다(방어 — 저장본 검증이 1차). 엔진은 런타임 import 0 유지. */
 export function retryAt(state: State, chapterId: string): { sceneId: string; state: State } | null {
-  const sceneId = state.retryQueue.find((id) => chapterOf(id) === chapterId);
+  const sceneId = state.retryQueue.find((id) => chapterOf(id) === chapterId && state.answers.some((a) => a.sceneId === id));
   if (!sceneId) return null;
   return {
     sceneId,

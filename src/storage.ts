@@ -1,4 +1,5 @@
 import type { State } from './types';
+import { ALL_SCENES, CHAPTERS } from './content';
 
 export const KEY = 'grandma-album/v1';
 
@@ -31,6 +32,18 @@ const strs = (v: unknown) => Array.isArray(v) && v.every(str);
 const vals = (o: any, f: (v: unknown) => boolean) => Object.values(o).every(f);
 const obj = (v: unknown) => !!v && typeof v === 'object' && !Array.isArray(v);
 
+// 참조 무결성: 저장본 id 는 콘텐츠에 있어야 한다(없는 id 로 화면이 장면을 열다 멈춘다).
+const SCENE_IDS = new Set(ALL_SCENES.map((sc) => sc.id));
+const COMPARE_IDS = new Set(ALL_SCENES.filter((sc) => sc.compare).map((sc) => sc.id));
+const CANDIDATES = new Set(ALL_SCENES.flatMap((sc) => sc.bundle?.candidates ?? []));
+const MOODS = new Set(ALL_SCENES.flatMap((sc) => sc.letter?.moods.map((m) => m.id) ?? []));
+const refsOk = (s: State) => s.retryQueue.every((id) => SCENE_IDS.has(id))
+  && s.answers.every((a) => SCENE_IDS.has(a.sceneId))
+  && s.bundle.every((id) => CANDIDATES.has(id))
+  && s.letterMoods.every((id) => MOODS.has(id))
+  && Object.keys(s.compareHits).every((id) => COMPARE_IDS.has(id))
+  && Object.keys(s.family).every((id) => CHAPTERS[s.chapter - 1].family.some((m) => m.id === id));
+
 /** 저장은 장 시작에서만 하므로 sceneIdx 는 0. 모양이 하나라도 어긋나면 깨진 저장본. */
 function valid(s: any): s is State {
   return s?.v === 1 && Number.isInteger(s.chapter) && s.chapter >= 1 && s.chapter <= 6 && s.sceneIdx === 0
@@ -39,7 +52,8 @@ function valid(s: any): s is State {
     && obj(s.flags) && obj(s.compareHits) && vals(s.compareHits, num) && num(s.playMs)
     && ['bundle', 'retryQueue', 'letterMoods'].every((k) => strs(s[k]))
     && Array.isArray(s.answers)
-    && s.answers.every((a: any) => obj(a) && str(a.sceneId) && typeof a.correct === 'boolean' && typeof a.retried === 'boolean');
+    && s.answers.every((a: any) => obj(a) && str(a.sceneId) && typeof a.correct === 'boolean' && typeof a.retried === 'boolean')
+    && refsOk(s);
 }
 
 /** dropped = 깨진 저장본을 지웠음(화면이 토스트 한 줄을 띄운다). */

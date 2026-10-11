@@ -91,11 +91,11 @@ export function Result({ content, state, onReplay, onTitle, photoSrc }: {
       <span style={{ ...label, left: 42, top: 306 }}>정답률</span>
       <span data-testid="r-rate" style={{ ...value, left: 190, top: 300 }}>{`${Math.round(s.correctRate * 100)}% (${right}/${state.answers.length})`}</span>
       <span style={{ ...label, left: 42, top: 366 }}>틀린 문제</span>
-      <div data-testid="r-wrong" class="terms abs" style={{ left: 42, top: 400 }}>
+      <div data-testid="r-wrong" class={`terms abs${s.wrong.length ? ' wrong-grid' : ''}`} style={{ left: 42, top: 400 }}>
         {s.wrong.length === 0
           ? <span style={{ font: '28px/1.2 var(--font-display)' }}>모두 맞았어요</span>
           : s.wrong.map((id) => (
-            <button key={id} type="button" class="key wide term" aria-label={`${id} 사진 뒷면 다시 보기`}
+            <button key={id} type="button" class="key chip" aria-label={`${id} 사진 뒷면 다시 보기`}
               onClick={() => setViewing(content.chapters.flatMap((c) => c.scenes).find((sc) => sc.id === id) ?? null)}>
               <span>{id}</span>
             </button>
