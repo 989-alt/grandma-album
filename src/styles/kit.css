@@ -1,0 +1,139 @@
+/* UI 킷 바인딩 — 정본 시안/grandma-album/2-세피아-kit.css 의 9-slice 규칙을 그대로 옮김.
+   모양은 전부 assets/ui/kit/*.png(9-slice 또는 img). CSS 로 그리는 것: 게이지 칸·태그·빈칸 테두리·포커스 링뿐.
+   색은 tokens.css 변수만(시안 이름 → 토큰: ink-brown=card-foreground, page-cream=surface-page, slot-tan=surface-slot,
+   photo-white=photo-frame, muted=muted-foreground, indigo=primary, brass=accent, rust=destructive, stamp-green=judge-correct, night=background). */
+
+* { box-sizing: border-box; }
+.stage { touch-action: manipulation; user-select: none; -webkit-user-select: none; color: var(--card-foreground); }
+.screen { position: absolute; left: 0; top: 0; width: 1024px; height: 768px; }
+button { margin: 0; padding: 0; background: none; font: inherit; color: inherit; }
+
+/* ── 9-slice 패널류 ─────────────────────────────────────────── */
+/* page-panel 1437×919 → slice 112, 0.3배 = 34px */
+.panel { border: 34px solid transparent; border-image: url('../../assets/ui/kit/page-panel.png') 112 fill / 34px round; }
+/* 패널 안 좌표를 테두리 박스(0,0) 기준으로 쓰는 래퍼 */
+.inner { position: absolute; left: -34px; top: -34px; width: 1024px; height: 768px; }
+.page { position: absolute; top: 34px; width: 500px; height: 700px; }
+/* strip → slice 60, 24px */
+.strip { border: 24px solid transparent; border-image: url('../../assets/ui/kit/strip.png') 60 fill / 24px round; }
+/* photo-frame / slot-empty → slice 110, 55px. 사진은 content-box 에 꽉 */
+.frame { border: 55px solid transparent; border-image: url('../../assets/ui/kit/photo-frame.png') 110 fill / 55px round;
+         filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--background) 45%, transparent)); }
+.frame > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.slot { border: 55px solid transparent; border-image: url('../../assets/ui/kit/slot-empty.png') 110 fill / 55px round; }
+.slot.glow { animation: glow 1.6s ease-in-out infinite; }
+@keyframes glow { 50% { filter: brightness(1.08); } }
+.frame.sm, .slot.sm { border-width: 27px; border-image-width: 27px; filter: drop-shadow(0 3px 6px color-mix(in srgb, var(--background) 35%, transparent)); }
+/* photo-back → slice 40 330 40 40, 0.5배(우측 주소선·원 보존) */
+.back { border-style: solid; border-color: transparent; border-width: 20px 165px 20px 20px;
+        border-image: url('../../assets/ui/kit/photo-back.png') 40 330 40 40 fill / 20px 165px 20px 20px stretch;
+        filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--background) 45%, transparent)); }
+/* nameplate → slice 80, 24px, 높이 48 */
+.nameplate { position: relative; border: 24px solid transparent; border-image: url('../../assets/ui/kit/nameplate.png') 80 fill / 24px stretch; height: 48px; }
+.nameplate > span { position: absolute; left: -24px; right: -24px; top: 0; text-align: center; font: 700 16px/1 var(--font-body); color: var(--card-foreground); transform: translateY(-50%); white-space: nowrap; }
+/* key-square / key-wide → slice 60, 13px */
+.key { position: relative; width: 64px; height: 64px; border: 13px solid transparent; border-image: url('../../assets/ui/kit/key-square.png') 60 fill / 13px stretch; cursor: pointer; }
+.key.wide { width: 160px; border-image-source: url('../../assets/ui/kit/key-wide.png'); }
+.key > span { position: absolute; left: -13px; right: -13px; top: 50%; text-align: center; transform: translateY(-50%); font: 28px/1 var(--font-hand); color: var(--card-foreground); }
+.key.wide > span { font: 22px/1 var(--font-display); }
+.key.lg { width: 88px; height: 88px; }
+.key.lg img { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; object-fit: contain; transform: translate(-50%,-50%); }
+.key:disabled { cursor: default; opacity: .45; }
+.key.used { opacity: .35; }
+/* 낱말 주머니 낱말 = key-wide, 폭은 글자대로 */
+.key.term { width: auto; min-width: 96px; height: 56px; padding: 0 8px; }
+.key.term > span { position: static; display: block; transform: none; font: 20px/30px var(--font-body); white-space: nowrap; }
+.key.term.on { filter: brightness(.92); }
+
+/* ── 버튼: btn-* (본체 0~245, 그림자 ~275) slice 140 140 144 140, 0.26배 → 높이 73, 글자 면 중심 y=32 ── */
+.btn { position: relative; display: inline-block; filter: drop-shadow(0 3px 4px color-mix(in srgb, var(--background) 25%, transparent)); height: 73px; min-width: 120px; padding: 0 20px;
+       border-style: solid; border-color: transparent; border-width: 36px 36px 37px 36px;
+       border-image-slice: 140 140 144 140 fill; border-image-width: 36px 36px 37px 36px; border-image-repeat: stretch; cursor: pointer; }
+.btn > span { position: absolute; left: -36px; right: -36px; top: -4px; transform: translateY(-50%); text-align: center; white-space: nowrap;
+              font: 700 22px/1 var(--font-display); color: var(--card-foreground); }
+.btn.indigo { border-image-source: url('../../assets/ui/kit/btn-indigo.png'); }
+.btn.indigo > span { color: var(--photo-frame); }
+.btn.amber { border-image-source: url('../../assets/ui/kit/btn-amber.png'); }
+.btn.paper { border-image-source: url('../../assets/ui/kit/btn-paper.png'); }
+/* 눌림: 그림자 없는 pressed 파일, 높이 65(8px 가라앉음) */
+.btn:active, .btn.pressed { filter: none; height: 65px; margin-top: 8px; border-image-slice: 140 fill; border-image-width: 36px 36px 29px 36px; border-width: 36px 36px 29px 36px; }
+.btn:active > span, .btn.pressed > span { top: -3px; }
+.btn.indigo:active, .btn.indigo.pressed { border-image-source: url('../../assets/ui/kit/btn-indigo-pressed.png'); }
+.btn.amber:active, .btn.amber.pressed { border-image-source: url('../../assets/ui/kit/btn-amber-pressed.png'); }
+.btn.paper:active, .btn.paper.pressed { border-image-source: url('../../assets/ui/kit/btn-paper-pressed.png'); }
+
+/* ── 선택 카드: btn-paper 큰 스케일, slice 100 140 104 140, 0.32배 ── */
+.cards { display: flex; flex-direction: column; gap: 14px; }
+.card { position: relative; display: block; width: 450px; min-height: 100px; text-align: left; border-style: solid; border-color: transparent; border-width: 32px 45px 33px 45px;
+        border-image: url('../../assets/ui/kit/btn-paper.png') 100 140 104 140 fill / 32px 45px 33px 45px stretch; cursor: pointer; }
+.card .text { display: block; margin-top: -10px; font: 28px/1.15 var(--font-hand); color: var(--card-foreground); word-break: keep-all; }
+.card .tags { display: flex; gap: 8px; margin-top: 6px; }
+.card:disabled { cursor: default; }
+.card.chosen, .card.locked { border-image-source: url('../../assets/ui/kit/btn-paper-pressed.png'); border-image-slice: 100 140 70 140 fill; border-image-width: 32px 45px 22px 45px; border-width: 32px 45px 22px 45px; }
+.card.chosen { margin-top: 8px; }
+.card.idle { opacity: .55; }
+.card.locked .text { color: var(--locked); }
+.card.locked .lock { position: absolute; right: -24px; top: -26px; width: 44px; }
+/* 태그 = CSS (허용 범위) */
+.tag { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border: 2px solid var(--card-foreground); border-radius: var(--radius-sm);
+       background: var(--photo-frame); font: 700 14px/1 var(--font-body); color: var(--card-foreground); }
+.tag img { width: 18px; height: 18px; object-fit: contain; }
+.tag.locked { border-color: var(--locked); color: var(--muted-foreground); background: var(--surface-slot); }
+
+/* ── 쪽지(내레이션): speech-note 통짜 이미지. 원 액자 중심 (201,212), 안쪽 반지름 148 (원본 px, 시안 기준 1014 폭) ── */
+.note { position: absolute; cursor: default; }
+.note > img.paper { display: block; width: 100%; }
+.note .portrait { position: absolute; border-radius: var(--radius-full); overflow: hidden; background: var(--surface-slot); }
+.note .portrait img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
+.note .say { position: absolute; font: 24px/1.45 var(--font-display); color: var(--card-foreground); word-break: keep-all; }
+.note .say b { color: var(--destructive); font-weight: 700; }
+
+/* ── HUD: 가족 초상 + 게이지 ── */
+.hud { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.family { display: flex; gap: 10px; align-items: center; }
+.family img, .family .slot { width: 44px; height: 54px; object-fit: contain; }
+.family .slot { border-width: 8px; border-image-width: 8px; }
+.family img.apart { filter: grayscale(1) opacity(.55); }
+.gauges { display: grid; grid-template-rows: repeat(3, 1fr); gap: 4px; }
+.gauge { display: flex; align-items: center; gap: 6px; }
+.gauge img { width: 20px; height: 20px; object-fit: contain; }
+.gauge i { display: block; width: 14px; height: 10px; border: 1.5px solid var(--card-foreground); border-radius: 2px; background: var(--surface-slot); transition: background-color .6s ease; }
+.gauge i.on.fam { background: var(--stat-family); }
+.gauge i.on.liv { background: var(--stat-home); }
+.gauge i.on.lang { background: var(--stat-third); }
+
+/* ── 사진 뒷면 ── */
+.back .line { font: 30px/1.4 var(--font-hand); color: var(--card-foreground); word-break: keep-all; }
+.back .line .blank { display: inline-block; width: 44px; height: 44px; margin: 0 2px; vertical-align: -10px; border: 2px dashed var(--muted-foreground); border-radius: var(--radius-sm);
+                     text-align: center; line-height: 40px; color: var(--muted-foreground); }
+.back .line .blank.filled { border-style: solid; border-color: var(--card-foreground); color: var(--card-foreground); }
+.back .line .blank.faint { opacity: .45; }
+.back .line .gap { display: inline-block; width: 12px; }
+.back .line .ox { display: block; margin-top: 16px; }
+.stamp { position: absolute; width: 110px; transform: rotate(-8deg); animation: stamp .3s ease-out; }
+@keyframes stamp { from { transform: rotate(-8deg) scale(1.6); opacity: 0; } to { transform: rotate(-8deg) scale(1); opacity: 1; } }
+.keys { display: flex; flex-wrap: wrap; gap: 16px; width: 464px; }
+.caption { font: 20px/1 var(--font-hand); color: var(--muted-foreground); }
+
+/* ── 모션: 인화 1.2초, 3초 무입력 손 깜빡임 ── */
+.frame.printing { animation: print 1.2s ease-out; }
+@keyframes print { from { filter: brightness(1.7) sepia(0) opacity(.3); } to { filter: brightness(1) sepia(0) opacity(1); } }
+.hint-hand { position: absolute; width: 56px; pointer-events: none; animation: blink 1s steps(2, jump-none) infinite; }
+@keyframes blink { 50% { opacity: .15; } }
+
+/* ── 토스트: 봉인 + 이름표, 포인터 통과. 오른쪽 아래(사진첩 왼쪽 쪽 봉인·버튼 자리와 겹치지 않게) ── */
+.toast { position: absolute; left: 540px; bottom: 48px; display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 10; }
+.toast img { width: 64px; }
+.toast .nameplate { min-width: 200px; }
+.toast .nameplate > span { position: static; display: block; font-size: 20px; }
+
+/* 낱말 주머니 */
+.terms { display: flex; flex-wrap: wrap; gap: 8px; width: 432px; }
+.meaning { font: 24px/1.45 var(--font-display); color: var(--card-foreground); word-break: keep-all; }
+.title { margin: 0; font: 700 56px/1.2 var(--font-display); color: var(--card-foreground); text-align: center; }
+
+/* 포커스 링(허용 CSS) */
+.btn:focus-visible, .card:focus-visible, .key:focus-visible, .frame:focus-visible, .slot:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+/* 마지막에 둬서 .btn·.nameplate·.key 의 position:relative 를 이긴다 */
+.abs { position: absolute; }
