@@ -1,0 +1,5 @@
+/* T07: 서브셋 woff2(scripts/build-assets.py fonts). 이름은 tokens.css --font-* 와 같다. */
+@font-face { font-family: 'Gowun Batang'; font-weight: 400; font-display: swap; src: url('../../assets/build/fonts/GowunBatang-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Gowun Batang'; font-weight: 700; font-display: swap; src: url('../../assets/build/fonts/GowunBatang-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Gowun Dodum'; font-weight: 400; font-display: swap; src: url('../../assets/build/fonts/GowunDodum-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Nanum Pen Script'; font-weight: 400; font-display: swap; src: url('../../assets/build/fonts/NanumPenScript-Regular.woff2') format('woff2'); }
