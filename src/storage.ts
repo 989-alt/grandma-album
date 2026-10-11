@@ -12,9 +12,10 @@ function get(): string | null {
   return mem;
 }
 
-function set(v: string): void {
-  if (!useMem) try { localStorage.setItem(KEY, v); return; } catch { useMem = true; }
+function set(v: string): boolean {
+  if (!useMem) try { localStorage.setItem(KEY, v); return true; } catch { useMem = true; }
   mem = v;
+  return false;
 }
 
 export function clear(): void {
@@ -22,8 +23,9 @@ export function clear(): void {
   mem = null;
 }
 
-export function save(state: State): void {
-  set(JSON.stringify(state));
+/** 영구 저장에 성공했으면 true, 메모리 폴백이면 false. */
+export function save(state: State): boolean {
+  return set(JSON.stringify(state));
 }
 
 const num = (v: unknown) => typeof v === 'number' && Number.isFinite(v);

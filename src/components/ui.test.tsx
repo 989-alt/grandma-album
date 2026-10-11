@@ -39,8 +39,11 @@ class N {
   get textContent(): string { return this.nodeType === 3 ? this.data : this.childNodes.map((c) => c.textContent).join(''); }
 }
 
+const docLs = new Map<string, (e: unknown) => void>();
 beforeAll(() => {
   (globalThis as Record<string, unknown>).document = {
+    addEventListener: (t: string, f: (e: unknown) => void) => { docLs.set(t, f); },
+    removeEventListener: (t: string) => { docLs.delete(t); },
     createElement: (t: string) => new N(1, t),
     createElementNS: (_: string, t: string) => new N(1, t),
     createTextNode: (s: string) => Object.assign(new N(3, '#text'), { data: String(s) }),
@@ -124,9 +127,14 @@ describe('T04 edge_cases', () => {
     fire(all(text('수'))[0], 'click');
     const filled = () => all(cls('filled'));
     expect(filled().map((n) => n.textContent)).toEqual(['수']);
+    expect(filled()[0].localName).toBe('button');
+    expect(filled()[0].attrs['aria-label']).toBe('마지막 글자 지우기');
     fire(filled()[0], 'click');
     expect(filled()).toHaveLength(0);
     expect('disabled' in all(text('수'))[0].attrs).toBe(false); // 뺀 열쇠는 다시 누를 수 있다
+    fire(all(text('수'))[0], 'click');
+    act(() => docLs.get('keydown')?.({ key: 'Backspace', preventDefault() {} })); // Backspace = 같은 동작
+    expect(filled()).toHaveLength(0);
     fire(all(text('신'))[0], 'click');
     fire(all(text('사'))[0], 'click');
     expect(judge).toHaveBeenCalledTimes(1);

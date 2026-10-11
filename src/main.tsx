@@ -105,7 +105,7 @@ function App() {
   };
 
   // 장 시작 = 자동 저장 + 토스트
-  const startChapter = (st: State) => { save(st); setSaved(st); setGame(st); say('저장했어요'); sfx('save'); setScreen('album'); };
+  const startChapter = (st: State) => { const ok = save(st); setSaved(st); setGame(st); if (ok) { say('저장했어요'); sfx('save'); } setScreen('album'); };
   const fresh = () => { since.current = Date.now(); startChapter(initialState(Date.now())); };
 
   const openScene = () => {

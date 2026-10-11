@@ -36,7 +36,7 @@ describe('storage', () => {
   it('save → load 왕복, 키는 grandma-album/v1 하나만', async () => {
     const st = await fresh();
     expect(st.load()).toEqual({ state: null, dropped: false });
-    st.save(state());
+    expect(st.save(state())).toBe(true);
     expect(ls.length).toBe(1);
     expect(ls.key(0)).toBe('grandma-album/v1');
     expect(st.load().state).toEqual(state());
@@ -69,6 +69,7 @@ describe('storage', () => {
     expect(() => st.load()).not.toThrow();
     expect(st.load().state).toBeNull();
     expect(() => st.save(state())).not.toThrow();
+    expect(st.save(state())).toBe(false);
     expect(st.load().state).toEqual(state());
     expect(() => st.clear()).not.toThrow();
     expect(st.load().state).toBeNull();

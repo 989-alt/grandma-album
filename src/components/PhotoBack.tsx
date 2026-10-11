@@ -2,7 +2,7 @@
 // 판정: stamp-ok/wrong(0.3초) + 글자 또렷/흐림. 오답이면 할머니 교정 쪽지. 그 뒤 '다음 사진'.
 // judge 가 없으면 읽기 전용(사진첩에서 지난 사진 뒤집기): 답을 채워 보여 준다.
 import { Fragment } from 'preact';
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import type { Scene } from '../types';
 import { Nameplate, Note, UI, Wide } from './Kit';
 
@@ -27,6 +27,13 @@ export function PhotoBack({ scene, judge, onNext, nextLabel = '다음 사진', m
   };
 
   const undo = () => setPicked((p) => p.slice(0, -1));
+  const canUndo = !done && b.type === 'initial';
+  useEffect(() => {
+    if (!canUndo) return;
+    const f = (e: KeyboardEvent) => { if (e.key === 'Backspace') { e.preventDefault(); undo(); } };
+    document.addEventListener('keydown', f);
+    return () => document.removeEventListener('keydown', f);
+  }, [canUndo]);
   let line;
   if (b.type === 'initial') {
     const words = b.answer.split(' ');
@@ -45,7 +52,10 @@ export function PhotoBack({ scene, judge, onNext, nextLabel = '다음 사진', m
               const k = picked[i];
               const ch = readOnly ? chars[i] : k !== undefined ? b.keys[k] : hints[wi]?.[ci] ?? '';
               const filled = readOnly || k !== undefined;
-              return <span key={i} class={`blank${filled ? ' filled' : ''}${result && !result.correct ? ' faint' : ''}`} onClick={filled && !done ? undo : undefined}>{ch}</span>;
+              const cls = `blank${filled ? ' filled' : ''}${result && !result.correct ? ' faint' : ''}`;
+              return filled && !done
+                ? <button key={i} type="button" class={cls} aria-label="마지막 글자 지우기" onClick={undo}>{ch}</button>
+                : <span key={i} class={cls}>{ch}</span>;
             })}
           </Fragment>
         ))}

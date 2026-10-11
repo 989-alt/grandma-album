@@ -109,7 +109,7 @@ button { margin: 0; padding: 0; background: none; font: inherit; color: inherit;
 /* ── 사진 뒷면 ── */
 .back .line { font: 30px/1.4 var(--font-hand); color: var(--card-foreground); word-break: keep-all; }
 .back .line .blank { display: inline-block; width: 44px; height: 44px; margin: 0 2px; vertical-align: -10px; border: 2px dashed var(--muted-foreground); border-radius: var(--radius-sm);
-                     text-align: center; line-height: 40px; color: var(--muted-foreground); }
+                     text-align: center; line-height: 40px; color: var(--muted-foreground); background: none; padding: 0; font: inherit; }
 .back .line .blank.filled { border-style: solid; border-color: var(--card-foreground); color: var(--card-foreground); }
 .back .line .blank.faint { opacity: .45; }
 .back .line .gap { display: inline-block; width: 12px; }
