@@ -156,7 +156,7 @@ describe('보따리·비교·편지·닫는 장면·낱말', () => {
     expect(ALL_SCENES.filter((s) => s.bundle)).toHaveLength(1);
   });
 
-  it('비교 5회: 장면·에셋 id·정규화 좌표·r 0.09', () => {
+  it('비교 5회: 장면·에셋 id·정규화 좌표·r 0.09(2-4 그래프만 0.12)', () => {
     const cmp = ALL_SCENES.filter((s) => s.compare);
     expect(cmp.map((s) => s.id)).toEqual(['1-3', '2-4', '3-2', '4-1', '5-7']);
     for (const s of cmp) {
@@ -165,11 +165,15 @@ describe('보따리·비교·편지·닫는 장면·낱말', () => {
       expect(c.spots.length).toBeGreaterThanOrEqual(2);
       expect(c.spots.length).toBeLessThanOrEqual(3);
       for (const p of c.spots) {
-        expect(p.r).toBe(0.09);
+        expect(p.r).toBe(s.id === '2-4' ? 0.12 : 0.09);
         expect(p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1).toBe(true);
       }
     }
     expect(scene('2-4').compare).toMatchObject({ a: 'graph-1916', b: 'graph-1932', graph: { years: [1916, 1924, 1932], tenant: [36.8, 42.2, 54.8] } });
+    expect(scene('2-4').compare!.spots).toEqual([
+      { x: 0.83, y: 0.6, r: 0.12, label: '1932년 — 빌린 땅 농민이 절반을 넘었다' },
+      { x: 0.5, y: 0.7, r: 0.12, label: '1924년 — 해마다 늘어났다' },
+    ]);
   });
 
   it('닫는 장면: brother-with / brother-apart 각 2줄, 둘째 줄은 1983년 방송', () => {
