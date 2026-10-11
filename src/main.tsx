@@ -79,7 +79,7 @@ function App() {
   const fresh = () => { since.current = Date.now(); startChapter(initialState(Date.now())); };
 
   const openScene = () => {
-    if (scene.bundle) { setScreen('bundle'); return; } // 보따리(5-1)는 고른 뒤 바로 뒷면으로
+    if (scene.bundle) { setScreen('bundle'); return; } // 보따리(5-1)는 고른 뒤 인화(1.2초) → 뒷면
     setPhase(undefined);
     setScreen('scene');
   };
@@ -133,7 +133,7 @@ function App() {
         <Scene key={scene.id} chapter={chapter} scene={scene} state={game} phase={phase} onAlbum={() => setScreen('album')} onDone={sceneDone} />
       )}
       {screen === 'bundle' && (
-        <Bundle state={game} scene={scene} onChange={setGame} onDone={() => { setPhase('back'); setScreen('scene'); }} />
+        <Bundle state={game} scene={scene} onChange={setGame} onDone={() => { setPhase('print'); setScreen('scene'); }} />
       )}
       {screen === 'compare' && (
         <Compare key={scene.id} state={game} scene={scene} onChange={setGame} onDone={() => advance(g.current)} />

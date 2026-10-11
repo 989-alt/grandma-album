@@ -102,6 +102,7 @@ test('(a) 완주 — 정답·오답 섞어서, 결과 7항·틀린 문제·닫�
   await expect(page.getByTestId('r-family').locator('[data-frame]')).toHaveCount(5);
   await expect(page.getByTestId('r-family').locator('[data-frame="empty"]')).not.toHaveCount(0); // 5-6 아버지
   await expect(page.getByTestId('r-items').locator('.key img')).not.toHaveCount(0);
+  await expect(page.getByTestId('r-items').locator('[data-item="spoon"]')).toHaveCount(1); // 보따리에 든 놋수저는 따로 또 그리지 않음
   await expect(page.getByTestId('r-words').locator('.say')).toHaveText(/놋수저/);
   await expect(page.getByTestId('r-question')).toHaveText('내가 그때 학생이었다면, 학도병으로 나갔을까?');
   await expect(page.getByText(/잘했|훌륭|아쉬|실패|성공/)).toHaveCount(0); // 평가 문구 없음

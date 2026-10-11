@@ -68,6 +68,8 @@ export function Result({ content, state, onReplay, onTitle }: { content: Content
   const right = state.answers.filter((a) => a.correct).length;
   const fam = members(chapters[5]);
   const items = s.items.bundle;
+  // 놋수저 칸은 보따리에 없을 때만(중복 없음). 남은 놋수저 = spoon_hidden(summarize items.spoon)
+  const spoonApart = s.items.spoon && !items.includes('spoon');
 
   return (
     <div class="screen" data-screen="result">
@@ -105,8 +107,12 @@ export function Result({ content, state, onReplay, onTitle }: { content: Content
         {[0, 1, 2].map((i) => (
           <div key={i} class="key lg" data-item={items[i] ?? ''}>{items[i] && <img src={IMG[`item-${items[i]}`]} alt={items[i]} />}</div>
         ))}
-        <img src={UI['icon-bundle']} alt="" style={{ width: 40, alignSelf: 'center' }} />
-        <div class="key lg" data-item={s.items.spoon ? 'spoon' : ''}>{s.items.spoon && <img src={IMG['item-spoon']} alt="놋수저" />}</div>
+        {spoonApart && (
+          <>
+            <img src={UI['icon-bundle']} alt="" style={{ width: 40, alignSelf: 'center' }} />
+            <div class="key lg" data-item="spoon"><img src={IMG['item-spoon']} alt="놋수저" /></div>
+          </>
+        )}
       </div>
       <div data-testid="r-words">
         <Note left={550} top={350} width={432} portrait={UI['portrait-grandma']} alt="할머니" text={s.items.spoon ? WORDS.kept : WORDS.gone} />
