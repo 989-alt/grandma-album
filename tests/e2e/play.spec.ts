@@ -4,7 +4,10 @@ import { ALL_SCENES, CLOSING } from '../../src/content';
 
 const KEY = 'grandma-album/v1';
 const REPORT_PNG = '../harness/state/grandma-album/reports/T06-result.png';
-type Snap = { chapter: number; sceneIdx: number };
+type Snap = { chapter: number; sceneIdx: number; bgm: string | null };
+/** 장 → 곡(T08): 1 market · 2~3 lamp · 4 dawn · 5~6 winter */
+const BGM_OF: Record<number, string> = { 1: 'market', 2: 'lamp', 3: 'lamp', 4: 'dawn', 5: 'winter', 6: 'winter' };
+const sfx = (page: Page, text: string) => expect(page.getByTestId('sfx')).toHaveText(text);
 
 const sceneOf = (s: Snap) => ALL_SCENES.filter((x) => x.id.startsWith(`${s.chapter}-`))[s.sceneIdx];
 const snap = (page: Page) => page.evaluate(() => (window as unknown as { __album: Snap }).__album);
@@ -12,7 +15,7 @@ const visible = async (page: Page, sel: string) => (await page.locator(sel).coun
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
 
 /** 첫 답 계획: wrong 에 든 문항은 처음엔 틀리게, 재출제(retry)·나머지는 맞게. */
-async function answerBack(page: Page, wrong: Set<string>, answered: Set<string>) {
+async function answerBack(page: Page, wrong: Set<string>, answered: Set<string>, retry: boolean) {
   const where = (await page.locator('.nameplate span').first().textContent()) ?? '';
   const id = where.split(' · ')[1];
   const sc = ALL_SCENES.find((s) => s.id === id)!;
@@ -36,6 +39,7 @@ async function answerBack(page: Page, wrong: Set<string>, answered: Set<string>)
     }
   }
   await expect(page.locator(`.stamp[alt="${miss ? '오답 ✗' : '정답 ✓'}"]`)).toBeVisible();
+  if (retry) await sfx(page, miss ? '스윽' : '탁'); // 재출제 뒷면 판정 자막(main 이 잡는 지점)
 }
 
 /** 화면에 보이는 것 하나를 처리하며 stop() 이 참이 될 때까지 진행. */
@@ -52,6 +56,7 @@ async function drive(page: Page, wrong: Set<string>, stop: () => Promise<boolean
       const tiles = page.locator('.screen-bundle .tile');
       for (let i = 0; i < 3; i++) await tiles.nth(i).click();
       await button(page, '떠난다').click();
+      await sfx(page, '찰칵');
     } else if (await visible(page, '.screen-letter')) {
       if (await visible(page, '.screen-letter .skip')) await page.locator('.screen-letter .skip').click();
       await page.locator('.screen-letter .mood').first().click();
@@ -62,15 +67,19 @@ async function drive(page: Page, wrong: Set<string>, stop: () => Promise<boolean
       const box = (await after.boundingBox())!;
       await after.click({ position: { x: sp.x * box.width, y: sp.y * box.height } });
       await expect(button(page, '그만 보기')).toBeEnabled();
+      await sfx(page, '띵');
       await button(page, '그만 보기').click();
     } else if ((await visible(page, '.keys')) || (await button(page, 'O').count()) > 0) {
-      if (await visible(page, '[data-screen="retry"]')) seen.retry++;
-      await answerBack(page, wrong, answered);
+      const retry = await visible(page, '[data-screen="retry"]');
+      if (retry) seen.retry++;
+      await answerBack(page, wrong, answered, retry);
     } else if (await button(page, '다음 사진').count()) {
       await button(page, '다음 사진').click();
     } else if (await page.locator('.card:enabled').count()) {
       await page.locator('.card:enabled').first().click();
     } else if (await page.locator('.slot.glow').count()) {
+      const s = await snap(page);
+      expect(s.bgm).toBe(BGM_OF[s.chapter]); // 사진첩 = 그 장의 곡
       await page.locator('.slot.glow').click();
     } else if (await button(page, '다음').count()) {
       await button(page, '다음').click();
@@ -84,10 +93,15 @@ async function drive(page: Page, wrong: Set<string>, stop: () => Promise<boolean
 const storage = (page: Page) => page.evaluate(() => Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)])));
 
 test('(a) 완주 — 정답·오답 섞어서, 결과 7항·틀린 문제·닫는 장면·저장 스키마', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  expect((await snap(page)).bgm).toBeNull(); // 타이틀 = 곡 없음
   await button(page, '사진첩 열기').click();
+  await sfx(page, '톡'); // 장 시작 저장 자막
   // 초성 오답 1(1-2), O·X 오답 2(1-4, 3-4)
   const wrong = new Set(['1-2', '1-4', '3-4']);
   const seen = await drive(page, wrong, () => visible(page, '[data-screen="result"]'));
@@ -128,6 +142,8 @@ test('(a) 완주 — 정답·오답 섞어서, 결과 7항·틀린 문제·닫�
   await button(page, '타이틀').click();
   await expect(button(page, '사진첩 열기')).toBeVisible();
   expect(Object.keys(await storage(page))).toEqual([KEY]);
+  expect((await snap(page)).bgm).toBeNull();
+  expect(errors).toEqual([]); // 자동재생 차단 등 콘솔 에러 0
 });
 
 test('(b) 이어하기 — 3장 중간에서 reload → 3장 첫 장면', async ({ page }) => {

@@ -1,5 +1,5 @@
 import { render } from 'preact';
-import { useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import './styles/tokens.css';
 import './styles/kit.css';
 import { clear, load, save } from './storage';
@@ -18,9 +18,14 @@ import { Result } from './screens/Result';
 import { Toast } from './components/Toast';
 import { PhotoBack } from './components/PhotoBack';
 import { Btn, Note, UI } from './components/Kit';
+import { SFX_CAPTIONS, photo } from './assets';
+import { Bgm, pickBgm } from './audio';
 
 const CONTENT = { chapters: CHAPTERS, terms: TERMS, closing: CLOSING } as unknown as Content;
 const sceneById = (id: string) => ALL_SCENES.find((s) => s.id === id) as unknown as SceneT;
+
+const bgm = new Bgm();
+type Sfx = (typeof SFX_CAPTIONS)[number]['id'];
 
 type Screen = 'title' | 'resume' | 'album' | 'scene' | 'bundle' | 'compare' | 'letter' | 'retry' | 'outro' | 'closing' | 'result';
 /** 장 끝에서 다음 장(또는 끝)으로 넘어가기 전 들고 있는 것: 넘어갈 state, 재출제 문항, 지난 장 outro. */
@@ -61,12 +66,21 @@ function App() {
   const since = useRef(Date.now()); // 플레이 시간: 마지막으로 playMs 에 더한 시각
   const g = useRef(game);
   g.current = game;
-  (window as unknown as { __album?: State }).__album = game; // e2e 가 읽는 디버그 노출(state 만)
+  const [cap, setCap] = useState<{ text: string; k: number } | null>(null); // 효과음 자막(소리 없음) 1줄, 0.9초
+  const bgmId = screen === 'title' ? null : pickBgm(game.chapter);
+  (window as unknown as { __album?: State & { bgm: string | null } }).__album = { ...game, bgm: bgmId }; // e2e 가 읽는 디버그 노출(state + 곡 id)
+  useEffect(() => bgm.set(bgmId), [bgmId]);
+  useEffect(() => {
+    if (!cap) return;
+    const t = setTimeout(() => setCap(null), 900);
+    return () => clearTimeout(t);
+  }, [cap?.k]);
 
   const chapter = CHAPTERS[game.chapter - 1] as unknown as Chapter;
   const scene = chapter.scenes[game.sceneIdx];
 
   const say = (text: string) => setToast((t) => ({ text, k: (t?.k ?? 0) + 1 }));
+  const sfx = (id: Sfx) => setCap((c) => ({ text: SFX_CAPTIONS.find((x) => x.id === id)!.caption, k: (c?.k ?? 0) + 1 }));
   const tick = (st: State): State => {
     const now = Date.now();
     const ms = now - since.current;
@@ -75,7 +89,7 @@ function App() {
   };
 
   // 장 시작 = 자동 저장 + 토스트
-  const startChapter = (st: State) => { save(st); setSaved(st); setGame(st); say('저장했어요'); setScreen('album'); };
+  const startChapter = (st: State) => { save(st); setSaved(st); setGame(st); say('저장했어요'); sfx('save'); setScreen('album'); };
   const fresh = () => { since.current = Date.now(); startChapter(initialState(Date.now())); };
 
   const openScene = () => {
@@ -127,16 +141,16 @@ function App() {
           onRestart={() => { clear(); fresh(); }} />
       )}
       {screen === 'album' && (
-        <Album state={game} onOpen={openScene} onTerm={(w) => { termViews.current[w] = (termViews.current[w] ?? 0) + 1; }} />
+        <Album photoSrc={(id) => photo(sceneById(id).photoAsset)} state={game} onOpen={openScene} onTerm={(w) => { termViews.current[w] = (termViews.current[w] ?? 0) + 1; }} />
       )}
       {screen === 'scene' && (
-        <Scene key={scene.id} chapter={chapter} scene={scene} state={game} phase={phase} onAlbum={() => setScreen('album')} onDone={sceneDone} />
+        <Scene photoSrc={photo(scene.photoAsset)} key={scene.id} chapter={chapter} scene={scene} state={game} phase={phase} onAlbum={() => setScreen('album')} onDone={sceneDone} />
       )}
       {screen === 'bundle' && (
-        <Bundle state={game} scene={scene} onChange={setGame} onDone={() => { setPhase('print'); setScreen('scene'); }} />
+        <Bundle state={game} scene={scene} onChange={setGame} onDone={() => { setPhase('print'); sfx('print'); setScreen('scene'); }} />
       )}
       {screen === 'compare' && (
-        <Compare key={scene.id} state={game} scene={scene} onChange={setGame} onDone={() => advance(g.current)} />
+        <Compare srcA={photo(scene.compare?.a)} srcB={photo(scene.compare?.b)} key={scene.id} state={game} scene={scene} onChange={(st) => { setGame(st); sfx('found'); }} onDone={() => advance(g.current)} />
       )}
       {screen === 'letter' && (
         <Letter scene={scene} onDone={(moods) => { const st = { ...g.current, letterMoods: moods }; setGame(st); advance(st); }} />
@@ -144,7 +158,7 @@ function App() {
       {screen === 'retry' && pending?.retry && (
         <div class="screen panel" data-screen="retry"><div class="inner">
           <PhotoBack key={pending.retry} scene={sceneById(pending.retry)}
-            judge={(a) => answerBack(pending.state, sceneById(pending.retry!), a).correct} onNext={() => afterRetry(pending)} />
+            judge={(a) => { const ok = answerBack(pending.state, sceneById(pending.retry!), a).correct; sfx(ok ? 'correct' : 'wrong'); return ok; }} onNext={() => afterRetry(pending)} />
         </div></div>
       )}
       {screen === 'outro' && pending?.outro && (
@@ -155,6 +169,9 @@ function App() {
       )}
       {screen === 'closing' && <Closing lines={CLOSING.variants[summarize(CONTENT, game).closingKey]} onDone={() => setScreen('result')} />}
       {screen === 'result' && <Result content={CONTENT} state={game} onReplay={replay} onTitle={toTitle} />}
+      {cap && (
+        <div key={cap.k} class="toast sfx" role="status" data-testid="sfx"><div class="nameplate"><span>{cap.text}</span></div></div>
+      )}
       {toast && <Toast key={toast.k} text={toast.text} onDone={() => setToast(null)} />}
     </div>
   );

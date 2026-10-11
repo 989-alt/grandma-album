@@ -3,15 +3,15 @@
 import { useRef } from 'preact/hooks';
 import { bundleDrop, bundlePick } from '../engine';
 import type { Scene, State } from '../types';
-import note from '../../assets/ui/kit/speech-note.png';
-import grandma from '../../assets/ui/kit/portrait-grandma.png';
-import bundleIcon from '../../assets/ui/kit/icon-bundle.png';
-import spoon from '../../assets/img/kit/item-spoon.png';
-import bundle from '../../assets/img/kit/item-bundle.png';
-import book from '../../assets/img/kit/item-book.png';
-import radish from '../../assets/img/kit/item-radish.png';
-import photo from '../../assets/img/kit/item-photo.png';
-import medicine from '../../assets/img/kit/item-medicine.png';
+import note from '../../assets/build/kit/speech-note.webp';
+import grandma from '../../assets/build/kit/portrait-grandma.webp';
+import bundleIcon from '../../assets/build/kit/icon-bundle.webp';
+import spoon from '../../assets/build/kit/item-spoon.webp';
+import bundle from '../../assets/build/kit/item-bundle.webp';
+import book from '../../assets/build/kit/item-book.webp';
+import radish from '../../assets/build/kit/item-radish.webp';
+import photo from '../../assets/build/kit/item-photo.webp';
+import medicine from '../../assets/build/kit/item-medicine.webp';
 import '../styles/compare.css';
 
 const ITEM: Record<string, string> = { spoon, bundle, book, radish, photo, medicine };

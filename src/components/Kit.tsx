@@ -1,13 +1,12 @@
 // 킷 조각 URL + 작은 원형(버튼·이름표·쪽지). 그림 연결(webp 변환·PHOTOS)은 T07 이 src/assets.ts 로 옮긴다.
 import type { ComponentChildren } from 'preact';
 import { TERMS } from '../content';
+import { KIT } from '../assets';
 
-const glob = (m: Record<string, string>) =>
-  Object.fromEntries(Object.entries(m).map(([p, url]) => [p.slice(p.lastIndexOf('/') + 1, -4), url]));
 /** assets/ui/kit/*.png — 이름(확장자 없음) → URL */
-export const UI = glob(import.meta.glob('../../assets/ui/kit/*.png', { eager: true, import: 'default' }) as Record<string, string>);
+export const UI = KIT;
 /** assets/img/kit/*.png — 주인공 표정·1~2장 가족 초상·물건 */
-export const IMG = glob(import.meta.glob('../../assets/img/kit/*.png', { eager: true, import: 'default' }) as Record<string, string>);
+export const IMG = KIT;
 
 type Kind = 'indigo' | 'amber' | 'paper';
 export function Btn({ kind, label, onClick, left, top, width = 120, disabled }: {

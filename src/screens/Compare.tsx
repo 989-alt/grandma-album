@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { compareHit } from '../engine';
 import type { Scene, State } from '../types';
 import { Graph } from '../components/compare/Graph';
-import stampRing from '../../assets/ui/kit/stamp-ring.png';
-import stampOk from '../../assets/ui/kit/stamp-ok.png';
+import stampRing from '../../assets/build/kit/stamp-ring.webp';
+import stampOk from '../../assets/build/kit/stamp-ok.webp';
 import '../styles/compare.css';
 
 const AUTO_MS = 900;

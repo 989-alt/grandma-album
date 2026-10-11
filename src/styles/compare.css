@@ -1,46 +1,13 @@
-/* T05 비교·편지·보따리 화면. 9-slice 규칙은 시안 2-세피아-kit.css 에서 필요한 것만 복사(수치 그대로),
-   색·서체 이름만 tokens.css 변수로 바꿨다. kit.css(T04)와 겹치지 않게 전부 .gx 아래로 가둔다. */
+/* T05 비교·편지·보따리 화면 전용 규칙. 패널·틀·열쇠·버튼·카드·쪽지·.abs 같은 공용 9-slice 는 kit.css 한 곳만 쓴다(T08: url 중복 제거).
+   색·서체는 tokens.css 변수만. 전부 .gx 아래로 가둔다. */
 .gx { position: absolute; left: 0; top: 0; width: 1024px; height: 768px; color: var(--card-foreground); font-family: var(--font-body); }
-.gx * { box-sizing: border-box; }
-.gx button { margin: 0; padding: 0; background: none; font: inherit; color: inherit; }
 .gx button:disabled { opacity: .5; cursor: default; }
-
-/* page-panel → slice 112, 34px */
-.gx .panel { border: 34px solid transparent; border-image: url('../../assets/ui/kit/page-panel.png') 112 fill / 34px round; }
-.gx .inner { position: absolute; left: -34px; top: -34px; width: 1024px; height: 768px; }
-.gx .page { position: absolute; top: 34px; width: 500px; height: 700px; }
-/* photo-frame → slice 110, 55px */
-.gx .frame { border: 55px solid transparent; border-image: url('../../assets/ui/kit/photo-frame.png') 110 fill / 55px round; filter: drop-shadow(0 6px 14px rgba(0,0,0,.28)); }
 .gx .pic { position: relative; width: 100%; height: 100%; }
 .gx .pic > img { display: block; width: 100%; height: 100%; object-fit: cover; }
-/* key-square / key-wide → slice 60, 13px */
-.gx .key { position: relative; width: 64px; height: 64px; border: 13px solid transparent; border-image: url('../../assets/ui/kit/key-square.png') 60 fill / 13px stretch; cursor: pointer; }
-.gx .key.wide { width: 160px; border-image: url('../../assets/ui/kit/key-wide.png') 60 fill / 13px stretch; }
-.gx .key > span { position: absolute; left: -13px; right: -13px; top: 50%; text-align: center; transform: translateY(-50%); font: 28px/1 var(--font-hand); }
-.gx .key.wide > span { font: 22px/1 var(--font-display); }
-.gx .key.lg { width: 88px; height: 88px; }
-.gx .key.lg img { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; object-fit: contain; transform: translate(-50%,-50%); }
 .gx .key.lg.taken img { opacity: .4; }
-/* btn-* → slice 140 140 144 140, 36/37px, 높이 73. 눌림 = pressed 파일 높이 65 */
-.gx .btn { position: relative; display: inline-block; filter: drop-shadow(0 3px 4px rgba(0,0,0,.18)); height: 73px; min-width: 120px; padding: 0 20px; border-style: solid; border-color: transparent;
-           border-width: 36px 36px 37px 36px; border-image-slice: 140 140 144 140 fill; border-image-width: 36px 36px 37px 36px; border-image-repeat: stretch; cursor: pointer; }
-.gx .btn > span { position: absolute; left: -36px; right: -36px; top: -4px; transform: translateY(-50%); text-align: center; white-space: nowrap; font: 700 22px/1 var(--font-display); color: var(--card-foreground); }
-.gx .btn.amber { border-image-source: url('../../assets/ui/kit/btn-amber.png'); }
-.gx .btn.paper { border-image-source: url('../../assets/ui/kit/btn-paper.png'); }
-.gx .btn.pressed { filter: none; height: 65px; border-image-slice: 140 fill; border-image-width: 36px 36px 29px 36px; border-width: 36px 36px 29px 36px; }
-.gx .btn.pressed > span { top: -3px; }
-.gx .btn.paper.pressed { border-image-source: url('../../assets/ui/kit/btn-paper-pressed.png'); }
-/* 선택 카드 자리의 종이(btn-paper 큰 스케일) — 편지 본문 */
-.gx .card { position: relative; border-style: solid; border-color: transparent; border-width: 32px 45px 33px 45px;
-            border-image: url('../../assets/ui/kit/btn-paper.png') 100 140 104 140 fill / 32px 45px 33px 45px stretch; cursor: pointer; text-align: left; }
-/* 쪽지(speech-note 통짜 img) */
-.gx .note > img.paper { display: block; width: 100%; }
-.gx .note .portrait { position: absolute; border-radius: 50%; overflow: hidden; background: var(--surface-slot); }
-.gx .note .portrait img { width: 100%; height: 100%; object-fit: cover; }
-.gx .note .say { position: absolute; font: var(--size-lg)/1.45 var(--font-display); word-break: keep-all; }
 .gx .mark { position: absolute; width: 56px; height: 56px; }
 .gx .mark.faint { opacity: .35; }
-.gx .btn:focus-visible, .gx .card:focus-visible, .gx .key:focus-visible, .gx .pic:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+.gx .pic:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
 
 /* ── 비교: 찾은 곳 도장 + 라벨(태그 = 허용 CSS), 오답 잔물결(허용 CSS) ── */
 .gx .pic .mark { transform: translate(-50%,-50%); pointer-events: none; }
@@ -58,6 +25,3 @@
 .gx .letter { display: flex; flex-direction: column; justify-content: flex-start; overflow: auto; }
 .gx .letter .line { display: block; margin: 0 0 6px; font: 28px/1.2 var(--font-hand); word-break: keep-all; }
 .gx .nudge { font: var(--size-base)/1 var(--font-body); }
-
-/* 맨 끝: .key·.btn·.card 의 position:relative 보다 뒤에 와야 절대 배치가 이긴다 */
-.gx .abs { position: absolute; }
