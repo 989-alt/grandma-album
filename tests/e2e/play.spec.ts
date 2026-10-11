@@ -258,6 +258,22 @@ const T10 = (name: string) => `../harness/state/grandma-album/reports/T10-${name
 type Stats = { family: number; home: number; third: number };
 const stats = async (page: Page) => (await page.evaluate(() => (window as unknown as { __album: { stats: Stats } }).__album.stats));
 
+test('(h0) T15 카드 탭 시 효과음 Audio.play 호출 ≥1 (자막과 함께)', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __plays: string[] };
+    w.__plays = [];
+    const orig = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) { w.__plays.push(this.src); return orig.call(this); };
+  });
+  await page.goto('/?screen=scene&id=1-3');
+  await drive(page, new Set(), async () => (await page.locator('.card:enabled:not(.letter)').count()) > 0); // 내레이션 → 카드 선택 화면(클릭 = 첫 제스처)
+  const count = () => page.evaluate(() => (window as unknown as { __plays: string[] }).__plays.length);
+  const before = await count();
+  await page.locator('.card:enabled:not(.letter)').first().click();
+  await sfx(page, '사락');
+  expect(await count()).toBeGreaterThanOrEqual(before + 1);
+});
+
 test('(h) T10 비교 장면 순서 1-3: 선택 → 인화 → 비교 → 뒷면, 인화 중 사진첩 이탈 후 다시 해도 효과 1번', async ({ page }) => {
   const errors: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });

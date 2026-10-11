@@ -51,16 +51,22 @@ def img():
     print(f'photoAsset 키 {len(keys)} · 누락 {len(miss)}' + (f': {miss}' if miss else ''))
 
 
-def mp3(src, out, kbps):
+def mp3(src, out, kbps, cap=None, fade=0.12):
     import lameenc
     import miniaudio
     d = miniaudio.decode_file(str(src), output_format=miniaudio.SampleFormat.SIGNED16, nchannels=1, sample_rate=32000)
+    pcm = d.samples
+    if cap:  # 효과음: 최대 cap 초(mp3 패딩 ~70ms 포함 재생 1.5초 이내)로 자르고 끝 fade 초는 선형 페이드아웃(정수 연산 = 결정적)
+        pcm = pcm[:round(cap * 32000)]
+        n = min(len(pcm), round(fade * 32000))
+        for i in range(n):
+            pcm[len(pcm) - n + i] = pcm[len(pcm) - n + i] * (n - 1 - i) // (n - 1)
     enc = lameenc.Encoder()
     enc.set_bit_rate(kbps)
     enc.set_in_sample_rate(32000)
     enc.set_channels(1)
     enc.set_quality(2)
-    out.write_bytes(enc.encode(d.samples.tobytes()) + enc.flush())
+    out.write_bytes(enc.encode(pcm.tobytes()) + enc.flush())
 
 
 def bgm():
@@ -73,7 +79,7 @@ def bgm():
 def sfx():
     (OUT / 'sfx').mkdir(parents=True, exist_ok=True)
     for p in sorted(A.glob('sfx/*.mp3')):
-        mp3(p, OUT / 'sfx' / f'{p.stem}.mp3', SFX_KBPS)
+        mp3(p, OUT / 'sfx' / f'{p.stem}.mp3', SFX_KBPS, cap=1.43)
     print(f'sfx: {len(list((OUT / "sfx").glob("*.mp3")))}')
 
 
