@@ -39,7 +39,7 @@ export interface Scene {
   event?: { setFamily: { id: string; status: FamilyStatus } };
   /** requiresFlag: 후보 → 그 후보를 허용하는 플래그. */
   bundle?: { candidates: string[]; slots: 3; requiresFlag: Record<string, keyof Flags> };
-  compare?: { a: string; b: string; spots: Spot[]; graph?: { years: number[]; tenant: number[] } };
+  compare?: { a: string; b: string; captionA: string; captionB: string; title: string; spots: Spot[]; graph?: { years: number[]; tenant: number[] } };
   letter?: { lines: string[]; moods: { id: string; text: string }[] };
   back: Back;
 }

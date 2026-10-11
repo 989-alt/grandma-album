@@ -9,6 +9,9 @@
 .gx .mark.faint { opacity: .35; }
 .gx .pic:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
 
+/* ── 비교: 사진 아래 캡션(시안 ③ .caption = 펜 글씨) ── */
+.gx .cap { font: var(--size-xl)/1 var(--font-hand); color: var(--card-foreground); white-space: nowrap; }
+
 /* ── 비교: 찾은 곳 도장 + 라벨(태그 = 허용 CSS), 오답 잔물결(허용 CSS) ── */
 .gx .pic .mark { transform: translate(-50%,-50%); pointer-events: none; }
 .gx .spot-label { position: absolute; transform: translate(-50%, 30px); white-space: nowrap; padding: 2px 8px; border: 2px solid var(--card-foreground); border-radius: var(--radius-sm);

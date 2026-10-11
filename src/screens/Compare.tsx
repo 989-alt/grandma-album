@@ -3,7 +3,9 @@
 // 키보드: 스팟마다 투명 버튼(aria-label = 라벨)을 after 위에 겹쳐 Tab·Enter 로도 찾는다.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { compareHit } from '../engine';
-import type { Scene, State } from '../types';
+import type { Chapter, Scene, State } from '../types';
+import { Strip } from '../components/Hud';
+import { Nameplate } from '../components/Kit';
 import { Graph } from '../components/compare/Graph';
 import stampRing from '../../assets/build/kit/stamp-ring.webp';
 import stampOk from '../../assets/build/kit/stamp-ok.webp';
@@ -11,8 +13,8 @@ import '../styles/compare.css';
 
 const AUTO_MS = 900;
 
-export function Compare({ state, scene, srcA, srcB, onChange, onDone }: {
-  state: State; scene: Scene; srcA?: string; srcB?: string; onChange: (s: State) => void; onDone: () => void;
+export function Compare({ chapter, state, scene, srcA, srcB, onChange, onDone }: {
+  chapter: Chapter; state: State; scene: Scene; srcA?: string; srcB?: string; onChange: (s: State) => void; onDone: () => void;
 }) {
   const spots = scene.compare?.spots ?? [];
   const graph = scene.compare?.graph;
@@ -55,6 +57,8 @@ export function Compare({ state, scene, srcA, srcB, onChange, onDone }: {
     <div class="gx screen-compare">
       <div class="page panel" style={{ left: '8px' }} />
       <div class="page panel" style={{ left: '516px' }} />
+      <Strip chapter={chapter} state={state} left={42} top={68} width={432} />
+      <Nameplate left={606} top={96} width={320} text={scene.compare?.title ?? ''} />
       <div class="frame abs" style={{ left: '42px', top: '184px', width: '432px', height: '325px' }}>
         <div class="pic">{graph ? <Graph graph={graph} upto={1} /> : srcA && <img src={srcA} alt="" />}</div>
       </div>
@@ -77,6 +81,9 @@ export function Compare({ state, scene, srcA, srcB, onChange, onDone }: {
           )}
         </div>
       </div>
+      <div class="cap abs" style={{ left: '60px', top: '520px' }}>{scene.compare?.captionA}</div>
+      <div class="cap abs" style={{ left: '568px', top: '520px' }}>{scene.compare?.captionB}</div>
+      <Nameplate left={158} top={560} text={`${chapter.id}장 · ${chapter.era}`} />
       {spots.map((_, i) => (
         <img key={i} class={i < found.length ? 'mark abs found' : 'mark faint abs'} src={i < found.length ? stampOk : stampRing} alt=""
           style={{ left: `${550 + 64 * i}px`, top: '560px' }} />

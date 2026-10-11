@@ -166,7 +166,7 @@ function App() {
         <Bundle src={photo(scene.photoAsset)} state={game} scene={scene} onChange={setGame} onDone={() => { setPhase('print'); setScreen('scene'); }} />
       )}
       {screen === 'compare' && (
-        <Compare srcA={photo(scene.compare?.a)} srcB={photo(scene.compare?.b)} key={scene.id} state={game} scene={scene} onChange={(st) => { setGame(st); sfx('found'); }} onDone={() => toBack(g.current)} />
+        <Compare chapter={chapter} srcA={photo(scene.compare?.a)} srcB={photo(scene.compare?.b)} key={scene.id} state={game} scene={scene} onChange={(st) => { setGame(st); sfx('found'); }} onDone={() => toBack(g.current)} />
       )}
       {screen === 'letter' && (
         <Letter src={photo(scene.photoAsset)} scene={scene} onDone={(moods) => toBack({ ...g.current, letterMoods: moods })} />

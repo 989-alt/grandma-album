@@ -3,7 +3,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { render } from 'preact';
 import { useState } from 'preact/hooks';
 import { act } from 'preact/test-utils';
-import { ALL_SCENES } from '../content';
+import { ALL_SCENES, CHAPTERS } from '../content';
 import { initialState } from '../engine';
 import type { Scene, State } from '../types';
 import { Compare } from './Compare';
@@ -66,6 +66,7 @@ const disabled = (n: Node0) => 'disabled' in n.attrs;
 
 const last = (log: { states: State[] }) => log.states[log.states.length - 1];
 const scene = (id: string) => ALL_SCENES.find((s) => s.id === id) as Scene;
+const chOf = (id: string) => CHAPTERS[Number(id[0]) - 1];
 
 /** 부모 흉내: onChange 로 state 를 들고 다시 그린다. */
 function Host({ kind, sc, init, log }: { kind: 'compare' | 'bundle'; sc: Scene; init: State; log: { states: State[]; done: number } }) {
@@ -73,7 +74,7 @@ function Host({ kind, sc, init, log }: { kind: 'compare' | 'bundle'; sc: Scene; 
   const onChange = (n: State) => { log.states.push(n); setS(n); };
   const onDone = () => { log.done++; };
   return kind === 'compare'
-    ? <Compare state={s} scene={sc} onChange={onChange} onDone={onDone} />
+    ? <Compare chapter={chOf(sc.id)} state={s} scene={sc} onChange={onChange} onDone={onDone} />
     : <Bundle state={s} scene={sc} onChange={onChange} onDone={onDone} />;
 }
 
@@ -121,11 +122,18 @@ describe('Compare (3-2)', () => {
   });
 
   it('2-4 그래프: 단일 계열, before 1막대·after 3막대', () => {
-    mount(<Compare state={initialState(0)} scene={scene('2-4')} onChange={() => {}} onDone={() => {}} />);
-    const after = one((n) => n.attrs['data-testid'] === 'after');
+    mount(<Compare chapter={chOf('2-4')} state={initialState(0)} scene={scene('2-4')} onChange={() => {}} onDone={() => {}} />);
     const bars = (n: Node0) => all((x) => x.localName === 'i', n);
-    expect(bars(after)).toHaveLength(3);
-    expect(bars(root).length - 3).toBe(1);
+    expect(all(hasClass('graph')).map((g) => bars(g).length)).toEqual([1, 3]);
+  });
+
+  // T13: 시안 ③ — 왼쪽 띠·캡션·장 이름표, 오른쪽 제목 이름표·캡션. 문구는 content compare 그대로.
+  it.each(['1-3', '2-4', '3-2', '4-1', '5-7'])('%s 캡션·제목·장 이름표', (id) => {
+    const sc = scene(id); const ch = chOf(id);
+    mount(<Compare chapter={ch} state={initialState(0)} scene={sc} onChange={() => {}} onDone={() => {}} />);
+    expect(all(hasClass('cap')).map((n) => n.textContent)).toEqual([sc.compare!.captionA, sc.compare!.captionB]);
+    expect(all(hasClass('nameplate')).map((n) => n.textContent)).toEqual([sc.compare!.title, `${ch.id}장 · ${ch.era}`]);
+    expect(all(hasClass('strip'))).toHaveLength(1);
   });
 });
 

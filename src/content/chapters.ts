@@ -53,6 +53,7 @@ export const CHAPTERS: Chapter[] = [
         ],
         compare: {
           a: 'compare-1-3-before', b: 'compare-1-3-after',
+          captionA: '개항 전 거리', captionB: '개항 후 거리', title: '개항 전 거리 ↔ 개항 후 거리',
           spots: [
             { x: 0.35, y: 0.65, r: R, label: '양복 입은 사람' },
             { x: 0.8, y: 0.35, r: R, label: '서양식 벽돌 건물' },
@@ -121,6 +122,7 @@ export const CHAPTERS: Chapter[] = [
         event: { setFamily: { id: 'uncle', status: 'apart' } },
         compare: {
           a: 'graph-1916', b: 'graph-1932',
+          captionA: '1916', captionB: '1932', title: '자기 땅/빌린 땅 농민 그래프',
           spots: [
             // T05 Graph: '빌린 땅' 단일 계열 3막대(1916·1924·1932). after 그림 기준 막대 가운데.
             { x: 0.83, y: 0.6, r: 0.12, label: '1932년 — 빌린 땅 농민이 절반을 넘었다' },
@@ -173,6 +175,8 @@ export const CHAPTERS: Chapter[] = [
         dialogue: ['냉면 배달 자전거가 지나갔다. 먹어 보지는 못했다.'],
         compare: {
           a: 'compare-3-2-before', b: 'compare-3-2-after',
+          // 그림: before(왼쪽) = 한국인 거리(장독·우물), after(오른쪽) = 일본인 거리(백화점·전기) — 캡션을 그림·스팟에 맞춤
+          captionA: '한국인 거리', captionB: '일본인 거리', title: '한국인 거리 ↔ 일본인 거리',
           spots: [
             { x: 0.6, y: 0.3, r: R, label: '백화점' },
             { x: 0.88, y: 0.2, r: R, label: '전기 가로등' },
@@ -237,6 +241,7 @@ export const CHAPTERS: Chapter[] = [
         autoFlag: 'first_color',
         compare: {
           a: 'compare-4-1-before', b: 'compare-4-1-after',
+          captionA: '광복 전 교실', captionB: '광복 후 교실', title: '광복 전 교실 ↔ 광복 후 교실',
           spots: [
             { x: 0.15, y: 0.3, r: R, label: '창밖에 색이 든 하늘' },
             { x: 0.6, y: 0.45, r: R, label: '선생님 손의 종이' },
@@ -345,6 +350,7 @@ export const CHAPTERS: Chapter[] = [
         dialogue: [],
         compare: {
           a: 'compare-5-7-before', b: 'compare-5-7-after',
+          captionA: '38도선', captionB: '휴전선', title: '38도선 ↔ 휴전선',
           spots: [
             { x: 0.55, y: 0.5, r: R, label: '철조망' },
             { x: 0.88, y: 0.28, r: R, label: '감시탑' },
