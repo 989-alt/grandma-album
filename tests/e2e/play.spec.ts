@@ -200,7 +200,8 @@ test('(e) 키보드만으로 비교 1장면 — Tab·Enter', async ({ page }) =>
   for (let i = 0; i < 10 && (await page.evaluate(() => document.activeElement?.textContent)) !== '그만 보기'; i++) await page.keyboard.press('Tab');
   await page.keyboard.press('Enter');
   await expect(page.locator('.screen-compare')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '1-4 사진 붙이기' })).toBeVisible();
+  await expect(page.locator('.back')).toBeVisible(); // T10: 비교 뒤 = 같은 장면 뒷면
+  await expect(page.locator('.nameplate span').first()).toHaveText(/1-3/);
 });
 
 test('(f) 깨진 저장본(chapter 99) → 타이틀 정상 + 토스트, 저장 삭제', async ({ page }) => {
@@ -221,3 +222,62 @@ test('(g) 1366×700 창 — 무대가 맞춰 줄어 하단 \'다음\' 버튼까�
   expect(b.x + b.width).toBeLessThanOrEqual(1366);
   await page.screenshot({ path: T09('scene-1366x700') });
 });
+
+const T10 = (name: string) => `../harness/state/grandma-album/reports/T10-${name}.png`;
+type Stats = { family: number; home: number; third: number };
+const stats = async (page: Page) => (await page.evaluate(() => (window as unknown as { __album: { stats: Stats } }).__album.stats));
+
+test('(h) T10 비교 장면 순서 1-3: 선택 → 인화 → 비교 → 뒷면, 인화 중 사진첩 이탈 후 다시 해도 효과 1번', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/?screen=scene&id=1-3');
+  const s0 = await stats(page);
+  const card = page.locator('.card:enabled', { hasText: '소학교에 간다' });
+  const toCard = () => drive(page, new Set(), async () => (await card.count()) > 0);
+  await toCard();
+  await card.click();
+  await button(page, '사진첩').click(); // 변화·인화 도중 이탈
+  await expect(page.getByRole('button', { name: '1-3 사진 붙이기' })).toBeVisible();
+  expect(await stats(page)).toEqual(s0); // 선택 효과는 아직 game 에 없음
+  await page.getByRole('button', { name: '1-3 사진 붙이기' }).click();
+  await toCard();
+  await card.click();
+  await sfx(page, '찰칵');
+  await expect(page.locator('.screen-compare')).toBeVisible(); // 인화 뒤 곧바로 비교 — 뒷면을 답하지 않았다
+  await expect(page.locator('.back')).toHaveCount(0);
+  const s1 = await stats(page);
+  expect(s1).toEqual({ ...s0, home: s0.home - 1, third: s0.third + 1 }); // 한 번만
+  await page.screenshot({ path: T10('compare-before-back') });
+  await drive(page, new Set(), () => visible(page, '.back')); // 비교 처리 → 뒷면
+  await expect(page.locator('.screen-compare')).toHaveCount(0);
+  await expect(page.locator('.nameplate span').first()).toHaveText(/1-3/);
+  expect(await stats(page)).toEqual(s1);
+  await drive(page, new Set(), () => visible(page, '.slot.glow'));
+  await expect(page.getByRole('button', { name: '1-4 사진 붙이기' })).toBeVisible();
+  expect(await stats(page)).toEqual(s1);
+  expect(errors).toEqual([]); // 효과음 파일 없어도 콘솔 에러 0
+});
+
+for (const [name, moods] of [['plain', ['fear']], ['withLetter', ['kin', 'return']]] as const) {
+  test(`(i) T10 편지 5-5 순서 + 판정 뒤 쪽지(${name})`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.goto('/?screen=scene&id=5-5');
+    await drive(page, new Set(), () => visible(page, '.screen-letter')); // 선택 → 인화 → 편지
+    await expect(page.locator('.back')).toHaveCount(0);
+    await page.locator('.screen-letter .skip').click();
+    for (const m of moods) await page.locator(`.screen-letter .mood[data-mood="${m}"]`).click();
+    await button(page, '다음').click();
+    await expect(page.locator('.back')).toBeVisible(); // 편지 → 뒷면
+    await expect(page.locator('.nameplate span').first()).toHaveText(/5-5/);
+    await expect(page.locator('.note')).toHaveCount(0);
+    await button(page, 'O').click();
+    const an = ALL_SCENES.find((s) => s.id === '5-5')!.back.afterNote!;
+    await expect(page.locator('.note .say')).toHaveText(an[name]);
+    if (name === 'withLetter') await page.screenshot({ path: T10('letter-note') });
+    await button(page, '다음 사진').click();
+    await expect(page.getByRole('button', { name: '5-6 사진 붙이기' })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+}

@@ -19,7 +19,7 @@ import { Toast } from './components/Toast';
 import { PhotoBack } from './components/PhotoBack';
 import { Btn, Note, UI } from './components/Kit';
 import { SFX_CAPTIONS, photo } from './assets';
-import { Bgm, pickBgm } from './audio';
+import { Bgm, pickBgm, playSfx } from './audio';
 
 const CONTENT: Content = { chapters: CHAPTERS, terms: TERMS, closing: CLOSING };
 const sceneById = (id: string) => ALL_SCENES.find((s) => s.id === id)!;
@@ -96,7 +96,7 @@ function App() {
   const scene = chapter.scenes[game.sceneIdx];
 
   const say = (text: string) => setToast((t) => ({ text, k: (t?.k ?? 0) + 1 }));
-  const sfx = (id: Sfx) => setCap((c) => ({ text: SFX_CAPTIONS.find((x) => x.id === id)!.caption, k: (c?.k ?? 0) + 1 }));
+  const sfx = (id: Sfx) => { playSfx(id); setCap((c) => ({ text: SFX_CAPTIONS.find((x) => x.id === id)!.caption, k: (c?.k ?? 0) + 1 })); };
   const tick = (st: State): State => {
     const now = Date.now();
     const ms = Math.min(now - since.current, MAX_TICK);
@@ -114,14 +114,11 @@ function App() {
     setScreen('scene');
   };
 
-  // 장면(뒷면까지) 뒤 = 비교 → 편지 → 다음 장면
-  const sceneDone = (st: State) => {
-    const t = tick(st);
-    setGame(t);
-    if (scene.compare) setScreen('compare');
-    else if (scene.letter) setScreen('letter');
-    else advance(t);
-  };
+  // 비교·편지 장면(PRD §3·§7): 인화 → 비교/편지 → 같은 장면 뒷면(phase='back', main 의 game 으로 다시 연다 — 선택 효과는 이미 game 에)
+  const printed = (st: State) => { setGame(st); setScreen(scene.compare ? 'compare' : 'letter'); };
+  const toBack = (st: State) => { setGame(st); setPhase('back'); setScreen('scene'); };
+  // 장면(뒷면까지) 뒤 = 다음 장면
+  const sceneDone = (st: State) => { const t = tick(st); setGame(t); advance(t); };
 
   const advance = (st: State) => {
     const n = nextScene(CONTENT, st);
@@ -162,16 +159,17 @@ function App() {
       )}
       {screen === 'scene' && (
         <Scene photoSrc={photo(scene.photoAsset)} key={scene.id} chapter={chapter} scene={scene} state={game} phase={phase} onAlbum={() => setScreen('album')} onDone={sceneDone}
+          interlude={!!(scene.compare || scene.letter)} onPrinted={printed}
           onChoose={() => sfx('card')} onPrint={() => sfx('print')} onJudge={(ok) => sfx(ok ? 'correct' : 'wrong')} />
       )}
       {screen === 'bundle' && (
         <Bundle src={photo(scene.photoAsset)} state={game} scene={scene} onChange={setGame} onDone={() => { setPhase('print'); setScreen('scene'); }} />
       )}
       {screen === 'compare' && (
-        <Compare srcA={photo(scene.compare?.a)} srcB={photo(scene.compare?.b)} key={scene.id} state={game} scene={scene} onChange={(st) => { setGame(st); sfx('found'); }} onDone={() => advance(g.current)} />
+        <Compare srcA={photo(scene.compare?.a)} srcB={photo(scene.compare?.b)} key={scene.id} state={game} scene={scene} onChange={(st) => { setGame(st); sfx('found'); }} onDone={() => toBack(g.current)} />
       )}
       {screen === 'letter' && (
-        <Letter src={photo(scene.photoAsset)} scene={scene} onDone={(moods) => { const st = { ...g.current, letterMoods: moods }; setGame(st); advance(st); }} />
+        <Letter src={photo(scene.photoAsset)} scene={scene} onDone={(moods) => toBack({ ...g.current, letterMoods: moods })} />
       )}
       {screen === 'retry' && pending?.retry && (
         <div class="screen panel" data-screen="retry"><div class="inner">

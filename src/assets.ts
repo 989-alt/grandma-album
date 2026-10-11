@@ -17,7 +17,10 @@ export const KIT: Record<string, string> = glob(import.meta.glob(
 export type BgmId = 'market' | 'lamp' | 'dawn' | 'winter';
 export const BGM = glob(import.meta.glob('../assets/build/bgm/*.mp3', { eager: true, import: 'default' }) as Record<string, string>) as Record<BgmId, string>;
 
-/** 효과음은 소리 없이 자막만(Gemini 생성 경로 미확정). */
+/** 효과음 id → URL(assets/sfx/<id>.mp3 → build-assets.py sfx → assets/build/sfx). 파일이 없으면 빈 맵 = 자막만. */
+export const SFX: Record<string, string> = glob(import.meta.glob('../assets/build/sfx/*.mp3', { eager: true, import: 'default' }) as Record<string, string>);
+
+/** 효과음 자막(소리와 함께, 소리 파일이 없으면 자막만). */
 export const SFX_CAPTIONS = [
   { id: 'print', caption: '찰칵' },
   { id: 'correct', caption: '탁' },

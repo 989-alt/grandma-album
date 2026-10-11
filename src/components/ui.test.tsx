@@ -147,6 +147,23 @@ describe('T04 edge_cases', () => {
     expect(back()).toMatchInlineSnapshot(`"<div class="back abs"><div class="abs"><div class="line">일제는 전국에 세운 <span class="blank filled faint">수</span><span class="blank filled faint">시</span>에 강제로 절을 하게 했다.</div></div><img class="stamp" src="stamp-wrong.webp" alt="오답 ✗"></img></div>"`);
   });
 
+  it('3b. (T10) 5-5 판정 뒤 할머니 쪽지 = 편지 마음에 따라(동족·돌아오겠다 → withLetter, 그 밖 → plain), 오답이면 교정 뒤에', () => {
+    const sc = scene('5-5');
+    const an = sc.back.afterNote!;
+    const run = (moods: string[], pick: string) => {
+      act(() => render(null, root as unknown as Element));
+      mount(<PhotoBack scene={sc} moods={moods} judge={(a) => answerBack(at('5-5'), sc, a).correct} onNext={() => {}} />);
+      expect(all(cls('note'))).toHaveLength(0); // 판정 전엔 쪽지 없음
+      fire(all(text(pick))[0], 'click');
+      return all(cls('note'))[0].textContent;
+    };
+    expect(run(['fear'], 'O')).toBe(an.plain);
+    expect(run(['kin'], 'O')).toBe(an.withLetter);
+    expect(run(['fear', 'return'], 'O')).toBe(an.withLetter);
+    expect(run(['fear'], 'X')).toBe(`${sc.back.type === 'ox' ? sc.back.fix : ''} ${an.plain}`);
+    expect(an.plain).not.toBe(an.withLetter);
+  });
+
   it('4. 게이지 숫자 노출 0 — 띠(초상·게이지) 렌더 텍스트·라벨에 숫자 없음', () => {
     const st = at('3-3', { stats: { family: 2, home: 3, third: 1 }, family: { brother: 'unknown', father: 'apart' } });
     mount(<Strip chapter={ch(3)} state={st} left={0} top={0} width={600} />);

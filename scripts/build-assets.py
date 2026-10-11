@@ -3,7 +3,8 @@
 원본은 건드리지 않는다. 재실행해도 같은 바이트가 나온다(결정적). 단계마다 필요한 라이브러리가 달라
 venv 두 개로 나눠 돌린다(ffmpeg 없음):
   <PIL venv>/python  scripts/build-assets.py img        장면·비교·키아트·킷 → WebP
-  <font venv>/python scripts/build-assets.py bgm fonts  BGM → 48kbps mono mp3, 폰트 → woff2 서브셋
+  <font venv>/python scripts/build-assets.py bgm fonts  BGM → 40kbps mono mp3, 폰트 → woff2 서브셋
+  <font venv>/python scripts/build-assets.py sfx        효과음(assets/sfx/*.mp3, 없으면 0개) → 48kbps mono mp3
 """
 import re
 import subprocess
@@ -18,6 +19,7 @@ SCENE_W, SCENE_Q = 720, 60     # 계약 순서 1 적용(800·70 → 10.09MB, 연
 TITLE_W, TITLE_Q = 1024, 72
 KIT_Q = 80
 BGM_KBPS = 40                  # 계약 순서 2 적용(48 → 9.27MB)
+SFX_KBPS = 48
 FONTS = ['GowunBatang-Regular', 'GowunBatang-Bold', 'GowunDodum-Regular', 'NanumPenScript-Regular']
 
 
@@ -49,20 +51,30 @@ def img():
     print(f'photoAsset 키 {len(keys)} · 누락 {len(miss)}' + (f': {miss}' if miss else ''))
 
 
-def bgm():
+def mp3(src, out, kbps):
     import lameenc
     import miniaudio
+    d = miniaudio.decode_file(str(src), output_format=miniaudio.SampleFormat.SIGNED16, nchannels=1, sample_rate=32000)
+    enc = lameenc.Encoder()
+    enc.set_bit_rate(kbps)
+    enc.set_in_sample_rate(32000)
+    enc.set_channels(1)
+    enc.set_quality(2)
+    out.write_bytes(enc.encode(d.samples.tobytes()) + enc.flush())
+
+
+def bgm():
     (OUT / 'bgm').mkdir(parents=True, exist_ok=True)
     for p in sorted(A.glob('bgm/bgm-*.mp3')):
-        d = miniaudio.decode_file(str(p), output_format=miniaudio.SampleFormat.SIGNED16, nchannels=1, sample_rate=32000)
-        enc = lameenc.Encoder()
-        enc.set_bit_rate(BGM_KBPS)
-        enc.set_in_sample_rate(32000)
-        enc.set_channels(1)
-        enc.set_quality(2)
-        data = enc.encode(d.samples.tobytes()) + enc.flush()
-        (OUT / 'bgm' / f'{p.stem[4:]}.mp3').write_bytes(data)
+        mp3(p, OUT / 'bgm' / f'{p.stem[4:]}.mp3', BGM_KBPS)
     print(f'bgm: {len(list((OUT / "bgm").glob("*.mp3")))}')
+
+
+def sfx():
+    (OUT / 'sfx').mkdir(parents=True, exist_ok=True)
+    for p in sorted(A.glob('sfx/*.mp3')):
+        mp3(p, OUT / 'sfx' / f'{p.stem}.mp3', SFX_KBPS)
+    print(f'sfx: {len(list((OUT / "sfx").glob("*.mp3")))}')
 
 
 def charset():
@@ -93,6 +105,6 @@ def fonts():
 
 
 if __name__ == '__main__':
-    steps = {'img': img, 'bgm': bgm, 'fonts': fonts}
+    steps = {'img': img, 'bgm': bgm, 'sfx': sfx, 'fonts': fonts}
     for s in sys.argv[1:] or sys.exit(__doc__):
         steps[s]()

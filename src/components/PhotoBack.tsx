@@ -10,8 +10,10 @@ type Answer = string[] | boolean;
 
 const where = (scene: Scene) => `사진 뒷면 · ${scene.id} · ${scene.id === '5-5' ? '지도서' : '교과서'} ${scene.back.source.join('·')}쪽`;
 
-export function PhotoBack({ scene, judge, onNext, nextLabel = '다음 사진' }: {
+export function PhotoBack({ scene, judge, onNext, nextLabel = '다음 사진', moods = [] }: {
   scene: Scene; judge?: (a: Answer) => boolean; onNext: () => void; nextLabel?: string;
+  /** 편지에서 고른 마음(state.letterMoods) — back.afterNote 고르기용 */
+  moods?: string[];
 }) {
   const b = scene.back;
   const [picked, setPicked] = useState<number[]>([]);
@@ -69,6 +71,11 @@ export function PhotoBack({ scene, judge, onNext, nextLabel = '다음 사진' }:
     if (next.length === b.answer.replace(/\s/g, '').length) answer(next.map((i) => b.keys[i]));
   };
 
+  // 판정 뒤 쪽지: 오답 교정 문구, 그 뒤 afterNote(편지 마음에 따라) 한 줄
+  const fix = result && !result.correct ? (b.type === 'ox' ? b.fix : b.prompt.replace('___', b.answer)) : '';
+  const after = result && b.afterNote ? (moods.some((m) => m === 'kin' || m === 'return') ? b.afterNote.withLetter : b.afterNote.plain) : '';
+  const note = [fix, after].filter(Boolean).join(' ');
+
   return (
     <>
       <Nameplate left={42} top={50} width={260} text={where(scene)} />
@@ -93,10 +100,7 @@ export function PhotoBack({ scene, judge, onNext, nextLabel = '다음 사진' }:
           <Wide label="X" left={430} top={590} onClick={() => answer(false)} />
         </>
       )}
-      {result && !result.correct && (
-        <Note left={42} top={500} width={540} portrait={UI['portrait-grandma']} alt="할머니"
-          text={b.type === 'ox' ? b.fix : b.prompt.replace('___', b.answer)} />
-      )}
+      {note && <Note left={42} top={500} width={540} portrait={UI['portrait-grandma']} alt="할머니" text={note} />}
       {done && <Wide label={nextLabel} left={800} top={590} onClick={onNext} />}
     </>
   );

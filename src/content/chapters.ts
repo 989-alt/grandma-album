@@ -326,7 +326,11 @@ export const CHAPTERS: Chapter[] = [
             { id: 'return', text: '꼭 살아서 돌아오겠다' },
           ],
         },
-        back: { type: 'ox', prompt: '6·25 전쟁 때 학생들이 학도병으로 참여하기도 했다', answer: true, fix: '학생들도 학도병으로 전쟁에 나가기도 했단다.', source: [327, 328] },
+        back: { type: 'ox', prompt: '6·25 전쟁 때 학생들이 학도병으로 참여하기도 했다', answer: true, fix: '학생들도 학도병으로 전쟁에 나가기도 했단다.', source: [327, 328],
+          afterNote: {
+            withLetter: '오빠 편지에 적힌 마음을 그대로 읽어 냈구나. 그 편지는 지금도 이 사진첩 뒤에 끼워 두었단다.',
+            plain: '두려운 마음도 맞단다. 오빠는 같은 말을 쓰는 사람끼리 싸우는 게 답답하다고도 적었지.',
+          } },
       },
       {
         id: '5-6', photoAsset: 'scene-5-6', source: [37, 39],

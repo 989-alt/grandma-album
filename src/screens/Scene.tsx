@@ -1,4 +1,5 @@
 // S3 장면. 순서: 내레이션 쪽지(할머니) → 대사(주인공) → 선택 카드 → 변화(게이지·초상) → 인화(1.2초) → 사진 뒷면 → 판정.
+// interlude(비교·편지 장면)면 인화 끝에 onPrinted(state) 로 넘기고, 부모가 비교·편지 뒤 phase='back' 으로 다시 연다.
 // 카드가 있으면 배치 A, 없으면 배치 C 몸통. 뒷면은 배치 C 뒷면(HUD 없음).
 // 장면 그림은 photoSrc(T07 연결 전엔 빈 사진 틀).
 import { useEffect, useState } from 'preact/hooks';
@@ -29,10 +30,11 @@ function pages(scene: SceneT): Page[] {
   return [...out.map((text) => ({ text, who: 'grandma' as const })), ...scene.dialogue.map((text) => ({ text, who: 'hero' as const }))];
 }
 
-export function Scene({ chapter, scene, state, photoSrc, phase: start = 'talk', onAlbum, onDone, onChoose = () => {}, onPrint = () => {}, onJudge = () => {} }: {
+export function Scene({ chapter, scene, state, photoSrc, phase: start = 'talk', onAlbum, onDone, onChoose = () => {}, onPrint = () => {}, onJudge = () => {}, interlude = false, onPrinted = () => {} }: {
   chapter: Chapter; scene: SceneT; state: State; photoSrc?: string; phase?: Phase; onAlbum: () => void; onDone: (state: State) => void;
   /** 효과음 자막용(T08): 카드 탭 직후 · 인화 시작 · 뒷면 판정 직후 */
   onChoose?: () => void; onPrint?: () => void; onJudge?: (correct: boolean) => void;
+  interlude?: boolean; onPrinted?: (state: State) => void;
 }) {
   const [entered] = useState(() => enterScene(state, scene));
   const [st, setSt] = useState(entered);
@@ -45,14 +47,14 @@ export function Scene({ chapter, scene, state, photoSrc, phase: start = 'talk', 
   useEffect(() => { if (phase === 'print') onPrint(); }, [phase]);
   useEffect(() => {
     if (phase !== 'change' && phase !== 'print') return;
-    const t = setTimeout(() => setPhase(phase === 'change' ? 'print' : 'back'), phase === 'change' ? 1000 : 1200);
+    const t = setTimeout(() => (phase === 'change' ? setPhase('print') : interlude ? onPrinted(st) : setPhase('back')), phase === 'change' ? 1000 : 1200);
     return () => clearTimeout(t);
   }, [phase]);
 
   if (phase === 'back') {
     return (
       <div class="screen panel"><div class="inner">
-        <PhotoBack scene={scene} judge={(a) => { const r = answerBack(st, scene, a); setSt(r.state); onJudge(r.correct); return r.correct; }} onNext={() => onDone(st)} />
+        <PhotoBack scene={scene} moods={st.letterMoods} judge={(a) => { const r = answerBack(st, scene, a); setSt(r.state); onJudge(r.correct); return r.correct; }} onNext={() => onDone(st)} />
       </div></div>
     );
   }

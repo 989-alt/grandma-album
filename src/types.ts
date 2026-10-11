@@ -20,9 +20,11 @@ export interface Choice {
 
 export interface Spot { x: number; y: number; r: number; label: string }
 
+/** afterNote(5-5): 판정 뒤 할머니 쪽지 — 편지 마음에 'kin'·'return' 이 있으면 withLetter, 아니면 plain. */
+type AfterNote = { afterNote?: { withLetter: string; plain: string } };
 export type Back =
-  | { type: 'initial'; prompt: string; answer: string; hint: string; keys: string[]; source: number[] }
-  | { type: 'ox'; prompt: string; answer: boolean; fix: string; source: number[] };
+  | ({ type: 'initial'; prompt: string; answer: string; hint: string; keys: string[]; source: number[] } & AfterNote)
+  | ({ type: 'ox'; prompt: string; answer: boolean; fix: string; source: number[] } & AfterNote);
 
 export interface Scene {
   id: string;
