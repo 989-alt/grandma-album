@@ -59,6 +59,7 @@ async function drive(page: Page, wrong: Set<string>, stop: () => Promise<boolean
       await button(page, '떠난다').click();
       await sfx(page, '찰칵');
     } else if (await visible(page, '.screen-letter')) {
+      if (await stop()) return seen; // 위 stop() 뒤에 편지가 막 떴을 수 있다 — 멈출 화면이면 넘기지 않는다
       if (await visible(page, '.screen-letter .skip')) await page.locator('.screen-letter .skip').click();
       await page.locator('.screen-letter .mood').first().click();
       await button(page, '다음').click();
@@ -75,8 +76,8 @@ async function drive(page: Page, wrong: Set<string>, stop: () => Promise<boolean
       await answerBack(page, wrong, answered);
     } else if (await button(page, '다음 사진').count()) {
       await button(page, '다음 사진').click();
-    } else if (await page.locator('.card:enabled').count()) {
-      await page.locator('.card:enabled').first().click();
+    } else if (await page.locator('.card:enabled:not(.letter)').count()) { // 편지 본문 카드(.letter)는 선택 카드가 아니다
+      await page.locator('.card:enabled:not(.letter)').first().click();
       await sfx(page, '사락'); // 카드 탭
       await sfx(page, '찰칵'); // 변화 1초 뒤 인화
     } else if (await page.locator('.slot.glow').count()) {
