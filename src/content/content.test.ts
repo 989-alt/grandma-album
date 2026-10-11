@@ -36,12 +36,12 @@ describe('PRD 글자 그대로', () => {
   it('내레이션 30개 모두 PRD 따옴표 문장과 일치', () => {
     for (const s of ALL_SCENES) expect(PRD, s.id).toContain(`"${s.narration}"`);
   });
-  it('O·X 문장은 PRD 그대로 (5-7 만 조사 이→은)', () => {
+  it('O·X 문장은 PRD 그대로 (5-7 은 관리자 판정 문구)', () => {
     for (const s of ALL_SCENES) {
-      if (s.back.type !== 'ox') continue;
-      const p = s.id === '5-7' ? s.back.prompt.replace('전쟁은', '전쟁이') : s.back.prompt;
-      expect(PRD, s.id).toContain(`O·X "${p}"`);
+      if (s.back.type !== 'ox' || s.id === '5-7') continue;
+      expect(PRD, s.id).toContain(`O·X "${s.back.prompt}"`);
     }
+    expect(scene('5-7').back).toMatchObject({ type: 'ox', prompt: '1953년 7월 정전 협정으로 6·25 전쟁이 완전히 끝났다', answer: false });
   });
   it('초성 hint 는 PRD 그대로', () => {
     for (const s of ALL_SCENES) if (s.back.type === 'initial') expect(PRD, s.id).toContain(`초성 "${s.back.hint}"`);
@@ -78,6 +78,7 @@ describe('뒷면 30문항', () => {
       keys.forEach((k) => expect(k, s.id).toMatch(/^[가-힣]$/));
       need.forEach((c) => expect(keys, s.id).toContain(c));
       expect(keys.length, s.id).toBeGreaterThanOrEqual(Math.max(6, new Set(need).size + 2));
+      expect(keys.length, s.id).toBeLessThanOrEqual(10);
     }
     expect(scene('3-3').back).toMatchObject({ answer: '신사', hint: 'ㅅㅅ', keys: ['신', '서', '사', '소', '수', '시'] });
   });
@@ -133,6 +134,9 @@ describe('선택·플래그·사건', () => {
     expect(scene('4-1').choices).toBeUndefined();
     const flagged = ALL_SCENES.flatMap((s) => (s.choices ?? []).filter((c) => c.flag).map((c) => `${s.id}:${c.flag}`));
     expect(flagged).toEqual(['1-1:spoon', '3-5:spoon_hidden']);
+    const gated = ALL_SCENES.flatMap((s) => (s.choices ?? []).filter((c) => c.requiresFlag).map((c) => `${s.id}:${c.text}:${c.requiresFlag}`));
+    expect(gated).toEqual(['4-3:외가에 놋수저를 보여 드린다:spoon_hidden']);
+    expect(scene('4-3').choices!.filter((c) => !c.requiresFlag).length).toBeGreaterThanOrEqual(2);
   });
 
   it('가족 사건: 2-4 삼촌 apart, 5-6 아버지 apart(선택 없음), 선택에는 setFamily 없음', () => {

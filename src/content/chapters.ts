@@ -3,7 +3,7 @@
 import type { Chapter, Choice, FamilyMember, FamilyStatus, Flags, Scene, Spot } from '../types';
 
 // types.ts 에 없는 필드는 여기서만 좁게 넓힌다(보고서 "타입 확장 필요").
-export type ChoiceData = Choice & { risk?: true };
+export type ChoiceData = Choice & { risk?: true; requiresFlag?: keyof Flags };
 export type BackData =
   | { type: 'initial'; prompt: string; answer: string; hint: string; keys: string[]; source: number[] }
   | { type: 'ox'; prompt: string; answer: boolean; fix: string; source: number[] };
@@ -270,8 +270,9 @@ export const CHAPTERS: ChapterData[] = [
         narration: '일본군 무장 해제를 이유로 38도선 남쪽엔 미군, 북쪽엔 소련군이 들어왔단다. 그때는 남북으로 오갈 수 있었어.',
         dialogue: ['38도선 너머 북쪽 외가에 다녀왔다.'],
         choices: [
-          { text: '외가에 놋수저를 보여 드린다', effects: { family: 0, home: 0, third: 0 } },
+          { text: '외가에 놋수저를 보여 드린다', effects: { family: 0, home: 0, third: 0 }, requiresFlag: 'spoon_hidden' },
           { text: '외가 마당에서 동생과 논다', effects: { family: 0, home: 0, third: 0 } },
+          { text: '외할머니 손을 잡고 마을 길을 걷는다', effects: { family: 0, home: 0, third: 1 } },
         ],
         back: { type: 'ox', prompt: '광복 직후 38도선은 넘을 수 없는 선이었다', answer: false, fix: '그땐 오갈 수 있었단다.', source: [143] },
       },
@@ -359,8 +360,8 @@ export const CHAPTERS: ChapterData[] = [
             { x: 0.88, y: 0.28, r: R, label: '감시탑' },
           ],
         },
-        // PRD 원문은 주어 조사가 '이'라 금지 문구 검사(PRD §6-2)에 걸린다 → 조사만 '은'으로 바꿈. 보고서 참조.
-        back: { type: 'ox', prompt: '1953년 7월에 6·25 전쟁은 끝났다', answer: false, fix: '끝난 게 아니라 멈춘 거란다. 정전 협정이야.', source: [147] },
+        // PRD 원문은 금지 문구 검사(PRD §6-2)에 걸려 관리자 판정 문구로 바꿈(fix round 1). 답 X 그대로.
+        back: { type: 'ox', prompt: '1953년 7월 정전 협정으로 6·25 전쟁이 완전히 끝났다', answer: false, fix: '끝난 게 아니라 멈춘 거란다. 정전 협정이야.', source: [147] },
       },
     ],
   },
