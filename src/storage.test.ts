@@ -87,4 +87,31 @@ describe('storage', () => {
     expect(() => st.save(state())).not.toThrow();
     expect(st.load().state).toEqual(state());
   });
+
+  it.each([
+    ['answers:[null]', { answers: [null] }],
+    ['answers sceneId 숫자', { answers: [{ sceneId: 1, correct: true, retried: false }] }],
+    ['answers correct 누락', { answers: [{ sceneId: '1-1', retried: false }] }],
+    ['retryQueue:[0]', { retryQueue: [0] }],
+    ['bundle:[null]', { bundle: [null] }],
+    ['letterMoods:[1]', { letterMoods: [1] }],
+    ['compareHits 문자열', { compareHits: { '4-1': 'x' } }],
+    ['family 낯선 값', { family: { father: 'dead' } }],
+    ['stats 범위 밖', { stats: { family: 4, home: 1, third: 3 } }],
+  ])('원소 검증 %s → 처음부터', async (_n, patch) => {
+    const st = await fresh();
+    ls.setItem('grandma-album/v1', JSON.stringify({ ...state(), ...patch }));
+    expect(st.load()).toEqual({ state: null, dropped: true });
+    expect(ls.length).toBe(0);
+  });
+
+  it('setItem 만 용량 초과: save → clear → 새 load 는 null (기존 키도 삭제)', async () => {
+    ls.setItem('grandma-album/v1', JSON.stringify(state()));
+    vi.stubGlobal('localStorage', { ...ls, getItem: ls.getItem, removeItem: ls.removeItem, setItem: () => { throw new DOMException('full', 'QuotaExceededError'); } });
+    const st = await fresh();
+    st.save({ ...state(), playMs: 1 });
+    st.clear();
+    expect(ls.length).toBe(0);
+    expect((await fresh()).load()).toEqual({ state: null, dropped: false });
+  });
 });
