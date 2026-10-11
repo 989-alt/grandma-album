@@ -64,6 +64,7 @@ async function drive(page: Page, wrong: Set<string>, stop: () => Promise<boolean
       await page.locator('.screen-letter .mood').first().click();
       await button(page, '다음').click();
     } else if (await visible(page, '.screen-compare')) {
+      if (await stop()) return seen; // 위 stop() 뒤에 비교가 막 떴을 수 있다 — 멈출 화면이면 스팟을 누르지 않는다
       const sp = sceneOf(await snap(page)).compare!.spots[0];
       const after = page.getByTestId('after');
       const box = (await after.boundingBox())!;
