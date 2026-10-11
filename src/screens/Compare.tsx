@@ -52,6 +52,17 @@ export function Compare({ chapter, state, scene, srcA, srcB, onChange, onDone }:
     onChange(res.state);
   };
 
+  // 그림을 자르지 않는다(contain): .fit 을 그림 비율로 틀 안에 맞추고, 스팟 좌표(그림 기준 0~1)·탭 판정을 .fit 기준으로.
+  // q = 그림 비율 / 틀 비율. 그래프·로드 전에는 틀 전체.
+  const [fitA, setFitA] = useState(0);
+  const [fitB, setFitB] = useState(0);
+  const fit = (set: (q: number) => void) => (e: Event) => {
+    const img = e.currentTarget as HTMLImageElement;
+    const box = img.closest('.pic')!.getBoundingClientRect();
+    set((img.naturalWidth / img.naturalHeight) / (box.width / box.height));
+  };
+  const fitStyle = (q: number) => ({ width: `${q && q < 1 ? q * 100 : 100}%`, height: `${q > 1 ? 100 / q : 100}%` });
+
   const pct = (v: number) => `${v * 100}%`;
   return (
     <div class="gx screen-compare">
@@ -60,11 +71,11 @@ export function Compare({ chapter, state, scene, srcA, srcB, onChange, onDone }:
       <Strip chapter={chapter} state={state} left={42} top={68} width={432} />
       <Nameplate left={606} top={96} width={320} text={scene.compare?.title ?? ''} />
       <div class="frame abs" style={{ left: '42px', top: '184px', width: '432px', height: '325px' }}>
-        <div class="pic">{graph ? <Graph graph={graph} upto={1} /> : srcA && <img src={srcA} alt="" />}</div>
+        <div class="pic"><div class="fit" style={fitStyle(fitA)}>{graph ? <Graph graph={graph} upto={1} /> : srcA && <img src={srcA} alt="" onLoad={fit(setFitA)} />}</div></div>
       </div>
       <div class="frame abs" style={{ left: '550px', top: '184px', width: '432px', height: '325px' }}>
-        <div class="pic" data-testid="after" onClick={tap}>
-          {graph ? <Graph graph={graph} upto={graph.years.length} /> : srcB && <img src={srcB} alt="" />}
+        <div class="pic"><div class="fit" style={fitStyle(fitB)} data-testid="after" onClick={tap}>
+          {graph ? <Graph graph={graph} upto={graph.years.length} /> : srcB && <img src={srcB} alt="" onLoad={fit(setFitB)} />}
           {spots.map((p, i) => (
             <button key={`k${i}`} type="button" class="spot-key" aria-label={p.label} aria-pressed={found.includes(i)}
               style={{ left: pct(p.x), top: pct(p.y) }}
@@ -79,7 +90,7 @@ export function Compare({ chapter, state, scene, srcA, srcB, onChange, onDone }:
           {ripple && (
             <span key={ripple.k} class="ripple" style={{ left: pct(ripple.x), top: pct(ripple.y) }} onAnimationEnd={() => setRipple(null)} />
           )}
-        </div>
+        </div></div>
       </div>
       <div class="cap abs" style={{ left: '60px', top: '520px' }}>{scene.compare?.captionA}</div>
       <div class="cap abs" style={{ left: '568px', top: '520px' }}>{scene.compare?.captionB}</div>

@@ -145,6 +145,9 @@ function App() {
   const toTitle = () => { setSaved(load().state); setScreen('title'); };
   const replay = () => { clear(); setSaved(null); setGame(initialState(Date.now())); setScreen('title'); };
 
+  // 6-2 마지막 사진: 오빠가 돌아왔으면(family.brother 'with') 오빠가 앉은 판, 아니면 빈 액자 판(PRD §3 6-2)
+  const photoOf = (id: string) => photo(id === '6-2' && game.family.brother === 'with' ? 'scene-6-2-brother' : sceneById(id).photoAsset);
+
   return (
     <div class="stage" style={{ position: 'fixed', left: '50%', top: 0, width: 'var(--size-stage-w)', height: 'var(--size-stage-h)', overflow: 'hidden',
       transform: `translateX(-50%) scale(${scale})`, transformOrigin: 'top center' }}>
@@ -155,10 +158,10 @@ function App() {
           onRestart={() => { clear(); fresh(); }} />
       )}
       {screen === 'album' && (
-        <Album photoSrc={(id) => photo(sceneById(id).photoAsset)} state={game} onOpen={openScene} onTerm={(w) => { termViews.current[w] = (termViews.current[w] ?? 0) + 1; }} />
+        <Album photoSrc={photoOf} state={game} onOpen={openScene} onTerm={(w) => { termViews.current[w] = (termViews.current[w] ?? 0) + 1; }} />
       )}
       {screen === 'scene' && (
-        <Scene photoSrc={photo(scene.photoAsset)} key={scene.id} chapter={chapter} scene={scene} state={game} phase={phase} onAlbum={() => setScreen('album')} onDone={sceneDone}
+        <Scene photoSrc={photoOf(scene.id)} key={scene.id} chapter={chapter} scene={scene} state={game} phase={phase} onAlbum={() => setScreen('album')} onDone={sceneDone}
           interlude={!!(scene.compare || scene.letter)} onPrinted={printed}
           onChoose={() => sfx('card')} onPrint={() => sfx('print')} onJudge={(ok) => sfx(ok ? 'correct' : 'wrong')} />
       )}
@@ -184,7 +187,7 @@ function App() {
         </div></div>
       )}
       {screen === 'closing' && <Closing lines={CLOSING.variants[summarize(CONTENT, game).closingKey]} onDone={() => { clear(); setSaved(null); setScreen('result'); }} />}
-      {screen === 'result' && <Result photoSrc={(id) => photo(sceneById(id).photoAsset)} content={CONTENT} state={game} onReplay={replay} onTitle={toTitle} />}
+      {screen === 'result' && <Result photoSrc={photoOf} content={CONTENT} state={game} onReplay={replay} onTitle={toTitle} />}
       {cap && (
         <div key={cap.k} class="toast sfx" role="status" data-testid="sfx"><div class="nameplate"><span>{cap.text}</span></div></div>
       )}

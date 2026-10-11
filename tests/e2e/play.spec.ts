@@ -328,3 +328,85 @@ for (const [name, moods] of [['plain', ['fear']], ['withLetter', ['kin', 'return
     expect(errors).toEqual([]);
   });
 }
+
+// T16 (a) 6-2 마지막 사진: 오빠 귀환(with)이면 오빠가 앉은 판, unknown 이면 빈 액자 판 — 장면·결과 넘김이 같은 판.
+const T16 = (name: string) => `../harness/state/grandma-album/reports/T16-${name}.png`;
+test('(j) T16 6-2 사진 — 오빠 with·unknown 판이 다르고, 결과 넘김도 같은 판', async ({ page }) => {
+  const src: Record<string, string> = {};
+  for (const brother of ['with', 'unknown'] as const) {
+    const st = {
+      v: 1, chapter: 6, sceneIdx: 0, stats: { family: 2, home: 2, third: brother === 'with' ? 2 : 1 },
+      family: { father: 'apart', mother: 'with', brother, okbun: 'with', little: 'with' },
+      flags: { spoon: true, spoon_hidden: false, first_color: true }, bundle: ['bundle', 'book', 'medicine'],
+      answers: ALL_SCENES.filter((sc) => !sc.id.startsWith('6-')).map((sc) => ({ sceneId: sc.id, correct: true, retried: false })),
+      retryQueue: [], compareHits: {}, letterMoods: [], startedAt: 0, playMs: 0,
+    };
+    await page.goto('/');
+    await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, JSON.stringify(st)]);
+    await page.reload();
+    await button(page, '사진첩 열기').click();
+    await page.getByRole('button', { name: /^이어하기/ }).click();
+    const img = page.locator('div.frame.abs:not(.sm) img'); // 장면 사진 틀(사진첩 썸네일 .frame.sm 제외)
+    await drive(page, new Set(), async () => (await snap(page)).sceneIdx === 1 && !(await visible(page, '.back')) && visible(page, 'div.frame.abs:not(.sm) img')); // 6-1 → 6-2
+    await expect(img).toBeVisible();
+    src[brother] = (await img.getAttribute('src'))!;
+    await page.screenshot({ path: T16(`6-2-${brother}`) });
+  }
+  expect(src.with).toBeTruthy();
+  expect(src.unknown).toBeTruthy();
+  expect(src.with).not.toBe(src.unknown);
+  await page.clock.install(); // 넘김은 600ms 마다 자동 — 시계를 멈춰 셋째 펼침(5·6장)에서 본다
+  await page.goto('/?screen=result'); // 디버그 결과 = 오빠 with
+  await expect(page.locator('[data-screen="flip"]')).toBeVisible();
+  await page.clock.runFor(1300);
+  await expect(page.locator('[data-screen="flip"] .nameplate').filter({ hasText: /^6장/ })).toBeVisible();
+  expect(await page.locator('[data-screen="flip"] .frame.sm img').last().getAttribute('src')).toBe(src.with);
+});
+
+// T16 (b) 비교 사진이 잘리지 않고(그림 비율 = 보이는 상자 비율, 틀 안), 모든 스팟 중심이 보이는 그림 위.
+for (const sc of ALL_SCENES.filter((s) => s.compare)) {
+  test(`(k) T16 비교 ${sc.id} — 그림 안 잘림, 스팟 ${sc.compare!.spots.length}곳 모두 보이는 그림 안`, async ({ page }) => {
+    await page.goto(`/?screen=scene&id=${sc.id}`);
+    await drive(page, new Set(), () => visible(page, '.screen-compare'));
+    const after = page.getByTestId('after');
+    const pic = (await page.locator('.screen-compare .pic').nth(1).boundingBox())!;
+    let box = (await after.boundingBox())!;
+    if (!sc.compare!.graph) {
+      const img = after.locator('img');
+      await expect.poll(async () => {
+        const nat = await img.evaluate((i: HTMLImageElement) => i.naturalWidth / i.naturalHeight);
+        box = (await after.boundingBox())!;
+        return Math.abs(box.width / box.height - nat) / nat;
+      }).toBeLessThan(0.02); // 보이는 상자 비율 = 그림 비율 → 안 잘림
+      const ib = (await img.boundingBox())!;
+      expect(Math.abs(ib.width - box.width) + Math.abs(ib.height - box.height)).toBeLessThan(2);
+      for (const i of [0, 1]) { // 양쪽 그림 다 틀 안
+        const p = (await page.locator('.screen-compare .pic').nth(i).boundingBox())!;
+        const b = (await page.locator('.screen-compare .fit').nth(i).boundingBox())!;
+        expect(b.x).toBeGreaterThanOrEqual(p.x - 1);
+        expect(b.y).toBeGreaterThanOrEqual(p.y - 1);
+        expect(b.x + b.width).toBeLessThanOrEqual(p.x + p.width + 1);
+        expect(b.y + b.height).toBeLessThanOrEqual(p.y + p.height + 1);
+      }
+    }
+    const keys = page.locator('.screen-compare .spot-key');
+    await expect(keys).toHaveCount(sc.compare!.spots.length);
+    for (const [i, sp] of sc.compare!.spots.entries()) {
+      const k = (await keys.nth(i).boundingBox())!;
+      const cx = k.x + k.width / 2, cy = k.y + k.height / 2;
+      expect(Math.abs(cx - (box.x + sp.x * box.width))).toBeLessThan(1.5);
+      expect(Math.abs(cy - (box.y + sp.y * box.height))).toBeLessThan(1.5);
+      for (const r of [box, pic]) {
+        expect(cx).toBeGreaterThanOrEqual(r.x);
+        expect(cx).toBeLessThanOrEqual(r.x + r.width);
+        expect(cy).toBeGreaterThanOrEqual(r.y);
+        expect(cy).toBeLessThanOrEqual(r.y + r.height);
+      }
+    }
+    if (sc.id === '3-2') {
+      await after.click({ position: { x: sc.compare!.spots[1].x * box.width, y: sc.compare!.spots[1].y * box.height } }); // 전기 가로등
+      await expect(page.locator('.screen-compare .spot-label')).toHaveText(sc.compare!.spots[1].label);
+      await page.screenshot({ path: T16('compare-3-2') });
+    }
+  });
+}
