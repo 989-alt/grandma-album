@@ -123,12 +123,12 @@ describe('T04 edge_cases', () => {
     mount(<PhotoBack scene={sc} judge={(a) => answerBack(at('3-3'), sc, a).correct} onNext={() => {}} />);
     fire(all(text('신'))[0], 'click');
     fire(all(text('사'))[0], 'click');
-    expect(back()).toMatchInlineSnapshot(`"<div class="back abs"><div class="abs"><div class="line">일제는 전국에 세운 <span class="blank filled">신</span><span class="blank filled">사</span>에 강제로 절을 하게 했다.</div></div><img class="stamp" src="stamp-ok.png" alt="정답 ✓"></img></div>"`);
+    expect(back()).toMatchInlineSnapshot(`"<div class="back abs"><div class="abs"><div class="line">일제는 전국에 세운 <span class="blank filled">신</span><span class="blank filled">사</span>에 강제로 절을 하게 했다.</div></div><img class="stamp" src="stamp-ok.webp" alt="정답 ✓"></img></div>"`);
     act(() => render(null, root as unknown as Element));
     mount(<PhotoBack scene={sc} judge={(a) => answerBack(at('3-3'), sc, a).correct} onNext={() => {}} />);
     fire(all(text('수'))[0], 'click');
     fire(all(text('시'))[0], 'click');
-    expect(back()).toMatchInlineSnapshot(`"<div class="back abs"><div class="abs"><div class="line">일제는 전국에 세운 <span class="blank filled faint">수</span><span class="blank filled faint">시</span>에 강제로 절을 하게 했다.</div></div><img class="stamp" src="stamp-wrong.png" alt="오답 ✗"></img></div>"`);
+    expect(back()).toMatchInlineSnapshot(`"<div class="back abs"><div class="abs"><div class="line">일제는 전국에 세운 <span class="blank filled faint">수</span><span class="blank filled faint">시</span>에 강제로 절을 하게 했다.</div></div><img class="stamp" src="stamp-wrong.webp" alt="오답 ✗"></img></div>"`);
   });
 
   it('4. 게이지 숫자 노출 0 — 띠(초상·게이지) 렌더 텍스트·라벨에 숫자 없음', () => {

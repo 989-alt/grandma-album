@@ -11,6 +11,13 @@ import { PhotoBack } from '../components/PhotoBack';
 const chapters = CHAPTERS as unknown as Chapter[];
 const SPREADS = 4; // 3 펼침 + 뒤표지
 
+// 작은 틀(테두리 27px) 안 사진: 틀 안 연필선(가장자리 10px)까지 꽉 채우고, 네 모서리는 삼각형으로 잘라 금속 모서리 밑에 끼운 것처럼.
+const C = 'calc(100% - 15px)';
+const THUMB = {
+  position: 'absolute', left: -17, top: -17, width: 'calc(100% + 34px)', height: 'calc(100% + 34px)', objectFit: 'cover',
+  clipPath: `polygon(15px 0, ${C} 0, 100% 15px, 100% ${C}, ${C} 100%, 15px 100%, 0 ${C}, 0 15px)`,
+} as const;
+
 export function Album({ state, onOpen, onTerm, photoSrc }: {
   state: State; onOpen: () => void; onTerm?: (word: string) => void; photoSrc?: (sceneId: string) => string | undefined;
 }) {
@@ -51,7 +58,7 @@ export function Album({ state, onOpen, onTerm, photoSrc }: {
             const src = photoSrc?.(sc.id);
             return (
               <button key={sc.id} type="button" class="frame sm abs" style={pos} aria-label={`${sc.id} 사진 뒷면 보기`} onClick={() => setViewing(sc as Scene)}>
-                {src && <img src={src} alt="" />}
+                {src && <img src={src} alt="" style={THUMB} />}
               </button>
             );
           }

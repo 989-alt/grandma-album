@@ -6,8 +6,9 @@ export function Title({ onOpen }: { onOpen: () => void }) {
   return (
     <div class="screen panel"><div class="inner">
       {/* 틀 590×470 − 테두리 55×2 = 그림 480×360(4:3) */}
-      <div class="frame abs" style={{ left: 217, top: 44, width: 590, height: 470 }}>
-        {PHOTOS['key-title'] && <img src={PHOTOS['key-title']} alt="등잔 아래 펼친 사진첩" />}
+      {/* 그림(3:2)은 4:3 틀에 세로가 꼭 맞아 object-position 만으론 아래 밝은 여백이 안 잘린다 → 1.2배 확대, 등잔·사진첩이 남게 기준점 35% 25% */}
+      <div class="frame abs" style={{ left: 217, top: 44, width: 590, height: 470, overflow: 'hidden' }}>
+        {PHOTOS['key-title'] && <img src={PHOTOS['key-title']} alt="등잔 아래 펼친 사진첩" style={{ transform: 'scale(1.2)', transformOrigin: '35% 25%' }} />}
       </div>
       <h1 class="nameplate abs" style={{ margin: 0, left: 332, top: 536, width: 360 }}>
         <span style={{ font: '700 30px/1 var(--font-display)' }}>할머니의 사진첩</span>

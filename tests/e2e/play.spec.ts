@@ -15,7 +15,7 @@ const visible = async (page: Page, sel: string) => (await page.locator(sel).coun
 const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
 
 /** 첫 답 계획: wrong 에 든 문항은 처음엔 틀리게, 재출제(retry)·나머지는 맞게. */
-async function answerBack(page: Page, wrong: Set<string>, answered: Set<string>, retry: boolean) {
+async function answerBack(page: Page, wrong: Set<string>, answered: Set<string>) {
   const where = (await page.locator('.nameplate span').first().textContent()) ?? '';
   const id = where.split(' · ')[1];
   const sc = ALL_SCENES.find((s) => s.id === id)!;
@@ -39,7 +39,7 @@ async function answerBack(page: Page, wrong: Set<string>, answered: Set<string>,
     }
   }
   await expect(page.locator(`.stamp[alt="${miss ? '오답 ✗' : '정답 ✓'}"]`)).toBeVisible();
-  if (retry) await sfx(page, miss ? '스윽' : '탁'); // 재출제 뒷면 판정 자막(main 이 잡는 지점)
+  await sfx(page, miss ? '스윽' : '탁'); // 뒷면 판정 자막(장면·재출제 모두)
 }
 
 /** 화면에 보이는 것 하나를 처리하며 stop() 이 참이 될 때까지 진행. */
@@ -70,13 +70,14 @@ async function drive(page: Page, wrong: Set<string>, stop: () => Promise<boolean
       await sfx(page, '띵');
       await button(page, '그만 보기').click();
     } else if ((await visible(page, '.keys')) || (await button(page, 'O').count()) > 0) {
-      const retry = await visible(page, '[data-screen="retry"]');
-      if (retry) seen.retry++;
-      await answerBack(page, wrong, answered, retry);
+      if (await visible(page, '[data-screen="retry"]')) seen.retry++;
+      await answerBack(page, wrong, answered);
     } else if (await button(page, '다음 사진').count()) {
       await button(page, '다음 사진').click();
     } else if (await page.locator('.card:enabled').count()) {
       await page.locator('.card:enabled').first().click();
+      await sfx(page, '사락'); // 카드 탭
+      await sfx(page, '찰칵'); // 변화 1초 뒤 인화
     } else if (await page.locator('.slot.glow').count()) {
       const s = await snap(page);
       expect(s.bgm).toBe(BGM_OF[s.chapter]); // 사진첩 = 그 장의 곡

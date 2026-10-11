@@ -29,8 +29,10 @@ function pages(scene: SceneT): Page[] {
   return [...out.map((text) => ({ text, who: 'grandma' as const })), ...scene.dialogue.map((text) => ({ text, who: 'hero' as const }))];
 }
 
-export function Scene({ chapter, scene, state, photoSrc, phase: start = 'talk', onAlbum, onDone }: {
+export function Scene({ chapter, scene, state, photoSrc, phase: start = 'talk', onAlbum, onDone, onChoose = () => {}, onPrint = () => {}, onJudge = () => {} }: {
   chapter: Chapter; scene: SceneT; state: State; photoSrc?: string; phase?: Phase; onAlbum: () => void; onDone: (state: State) => void;
+  /** 효과음 자막용(T08): 카드 탭 직후 · 인화 시작 · 뒷면 판정 직후 */
+  onChoose?: () => void; onPrint?: () => void; onJudge?: (correct: boolean) => void;
 }) {
   const [entered] = useState(() => enterScene(state, scene));
   const [st, setSt] = useState(entered);
@@ -40,6 +42,7 @@ export function Scene({ chapter, scene, state, photoSrc, phase: start = 'talk', 
   const ps = pages(scene);
   const hasCards = visibleChoices(entered, scene).length > 0;
 
+  useEffect(() => { if (phase === 'print') onPrint(); }, [phase]);
   useEffect(() => {
     if (phase !== 'change' && phase !== 'print') return;
     const t = setTimeout(() => setPhase(phase === 'change' ? 'print' : 'back'), phase === 'change' ? 1000 : 1200);
@@ -49,7 +52,7 @@ export function Scene({ chapter, scene, state, photoSrc, phase: start = 'talk', 
   if (phase === 'back') {
     return (
       <div class="screen panel"><div class="inner">
-        <PhotoBack scene={scene} judge={(a) => { const r = answerBack(st, scene, a); setSt(r.state); return r.correct; }} onNext={() => onDone(st)} />
+        <PhotoBack scene={scene} judge={(a) => { const r = answerBack(st, scene, a); setSt(r.state); onJudge(r.correct); return r.correct; }} onNext={() => onDone(st)} />
       </div></div>
     );
   }
@@ -66,6 +69,7 @@ export function Scene({ chapter, scene, state, photoSrc, phase: start = 'talk', 
     const sum = c.effects.family + c.effects.home + c.effects.third;
     setMood(sum < 0 || (c.setFamily && c.setFamily.status !== 'with') ? 'worried' : sum > 0 ? 'happy' : 'calm');
     setSt(r.state);
+    onChoose();
     setPhase('change');
   };
 

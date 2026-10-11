@@ -144,10 +144,11 @@ function App() {
         <Album photoSrc={(id) => photo(sceneById(id).photoAsset)} state={game} onOpen={openScene} onTerm={(w) => { termViews.current[w] = (termViews.current[w] ?? 0) + 1; }} />
       )}
       {screen === 'scene' && (
-        <Scene photoSrc={photo(scene.photoAsset)} key={scene.id} chapter={chapter} scene={scene} state={game} phase={phase} onAlbum={() => setScreen('album')} onDone={sceneDone} />
+        <Scene photoSrc={photo(scene.photoAsset)} key={scene.id} chapter={chapter} scene={scene} state={game} phase={phase} onAlbum={() => setScreen('album')} onDone={sceneDone}
+          onChoose={() => sfx('card')} onPrint={() => sfx('print')} onJudge={(ok) => sfx(ok ? 'correct' : 'wrong')} />
       )}
       {screen === 'bundle' && (
-        <Bundle state={game} scene={scene} onChange={setGame} onDone={() => { setPhase('print'); sfx('print'); setScreen('scene'); }} />
+        <Bundle state={game} scene={scene} onChange={setGame} onDone={() => { setPhase('print'); setScreen('scene'); }} />
       )}
       {screen === 'compare' && (
         <Compare srcA={photo(scene.compare?.a)} srcB={photo(scene.compare?.b)} key={scene.id} state={game} scene={scene} onChange={(st) => { setGame(st); sfx('found'); }} onDone={() => advance(g.current)} />
