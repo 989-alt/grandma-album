@@ -1,4 +1,4 @@
-// 사진 뒷면(배치 C 뒷면). 초성 = 열쇠(back.keys) 탭 → 빈칸에 차례로, 글자 수가 차면 판정. O·X = key-wide 둘.
+// 사진 뒷면(배치 C 뒷면). 초성 = 열쇠(back.keys) 탭 → 빈칸에 차례로, 글자 수가 차면 판정. 채워진 빈칸 탭 = 마지막 글자 빼기. O·X = key-wide 둘.
 // 판정: stamp-ok/wrong(0.3초) + 글자 또렷/흐림. 오답이면 할머니 교정 쪽지. 그 뒤 '다음 사진'.
 // judge 가 없으면 읽기 전용(사진첩에서 지난 사진 뒤집기): 답을 채워 보여 준다.
 import { Fragment } from 'preact';
@@ -24,6 +24,7 @@ export function PhotoBack({ scene, judge, onNext, nextLabel = '다음 사진' }:
     setResult({ answer: a, correct: judge(a) });
   };
 
+  const undo = () => setPicked((p) => p.slice(0, -1));
   let line;
   if (b.type === 'initial') {
     const words = b.answer.split(' ');
@@ -42,7 +43,7 @@ export function PhotoBack({ scene, judge, onNext, nextLabel = '다음 사진' }:
               const k = picked[i];
               const ch = readOnly ? chars[i] : k !== undefined ? b.keys[k] : hints[wi]?.[ci] ?? '';
               const filled = readOnly || k !== undefined;
-              return <span key={i} class={`blank${filled ? ' filled' : ''}${result && !result.correct ? ' faint' : ''}`}>{ch}</span>;
+              return <span key={i} class={`blank${filled ? ' filled' : ''}${result && !result.correct ? ' faint' : ''}`} onClick={filled && !done ? undo : undefined}>{ch}</span>;
             })}
           </Fragment>
         ))}

@@ -22,7 +22,12 @@ export class Bgm {
       removeEventListener('pointerdown', arm, true);
       removeEventListener('keydown', arm, true);
       this.armed = true;
-      this.swap();
+      // 제스처 안에서 동기로 play() 를 불러 요소를 깨운다(iOS·Safari). 곡이 없으면(타이틀) 소리 0 으로 깨웠다 멈춘다.
+      const el = this.el;
+      const want = this.id;
+      el.src = BGM[want ?? 'market'];
+      el.volume = 0;
+      el.play().then(() => { if (this.id !== want) return; if (!want) el.pause(); else this.fade(VOL); }, () => {});
     };
     addEventListener('pointerdown', arm, true);
     addEventListener('keydown', arm, true);
@@ -41,7 +46,8 @@ export class Bgm {
     if (!this.id) { this.el.pause(); return; }
     const src = BGM[this.id];
     if (this.el.getAttribute('src') !== src) this.el.src = src; // 페이드아웃 뒤면 볼륨 0 에서 다시 올림
-    this.el.play().then(() => this.fade(VOL), () => {});
+    const want = this.id;
+    this.el.play().then(() => { if (this.id === want) this.fade(VOL); }, () => {}); // 그사이 곡이 바뀌었으면 그쪽 swap 에 맡긴다
   }
 
   private fade(to: number, then?: () => void) {

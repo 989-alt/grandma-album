@@ -12,13 +12,15 @@
 /* ── 비교: 찾은 곳 도장 + 라벨(태그 = 허용 CSS), 오답 잔물결(허용 CSS) ── */
 .gx .pic .mark { transform: translate(-50%,-50%); pointer-events: none; }
 .gx .spot-label { position: absolute; transform: translate(-50%, 30px); white-space: nowrap; padding: 2px 8px; border: 2px solid var(--card-foreground); border-radius: var(--radius-sm);
-                  background: var(--photo-frame); font: 700 var(--size-base)/1.2 var(--font-body); pointer-events: none; }
+                  background: var(--photo-frame); font: var(--size-base)/1.2 var(--font-body); pointer-events: none; }
+.gx .spot-key { position: absolute; width: var(--size-tap-min); height: var(--size-tap-min); transform: translate(-50%,-50%); border: 0; border-radius: var(--radius-full); cursor: inherit; }
+.gx .spot-key:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
 .gx .ripple { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; border: 3px solid var(--photo-frame); border-radius: 50%; pointer-events: none; animation: gx-ripple .4s ease-out forwards; }
 @keyframes gx-ripple { from { transform: scale(.2); opacity: .9; } to { transform: scale(1.4); opacity: 0; } }
 
 /* ── 그래프(2-4): DOM 막대 단일 계열, 색 = 가족 축 토큰 ── */
 .gx .graph { position: relative; display: flex; align-items: flex-end; justify-content: space-around; width: 100%; height: 100%; padding: 12px 16px 0; background: var(--photo-frame); }
-.gx .graph .bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 56px; height: 100%; font: 700 var(--size-sm)/1 var(--font-body); }
+.gx .graph .bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 56px; height: 100%; font: var(--size-sm)/1 var(--font-body); }
 .gx .graph .bar i { display: block; width: 100%; margin-bottom: 2px; border: 1.5px solid var(--card-foreground); background: var(--stat-family); }
 
 /* ── 편지 ── */

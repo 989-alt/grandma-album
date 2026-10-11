@@ -1,22 +1,6 @@
 // PRD §3 장면표 30장면. 내레이션은 PRD 표의 따옴표 문장 글자 그대로(교과서 문장).
 // source = 지도 내용 번호(교과분석.md ①~㊺), back.source = 교과서 쪽수(5-5 만 지도서 쪽).
-import type { Chapter, Choice, FamilyMember, FamilyStatus, Flags, Scene, Spot } from '../types';
-
-// types.ts 에 없는 필드는 여기서만 좁게 넓힌다(보고서 "타입 확장 필요").
-export type ChoiceData = Choice & { risk?: true; requiresFlag?: keyof Flags };
-export type BackData =
-  | { type: 'initial'; prompt: string; answer: string; hint: string; keys: string[]; source: number[] }
-  | { type: 'ox'; prompt: string; answer: boolean; fix: string; source: number[] };
-export type SceneData = Omit<Scene, 'choices' | 'bundle' | 'compare' | 'letter' | 'back'> & {
-  choices?: ChoiceData[];
-  autoFlag?: keyof Flags;
-  event?: { setFamily: { id: string; status: FamilyStatus } };
-  bundle?: { candidates: string[]; slots: 3; requiresFlag: Record<string, keyof Flags> };
-  compare?: { a: string; b: string; spots: Spot[]; graph?: { years: number[]; tenant: number[] } };
-  letter?: { lines: string[]; moods: { id: string; text: string }[] };
-  back: BackData;
-};
-export type ChapterData = Omit<Chapter, 'scenes'> & { scenes: SceneData[]; outro?: string };
+import type { Chapter, FamilyMember } from '../types';
 
 const father: FamilyMember = { id: 'father', name: '아버지', role: '아버지' };
 const mother: FamilyMember = { id: 'mother', name: '어머니', role: '어머니' };
@@ -29,7 +13,7 @@ const LATER: FamilyMember[] = [
 ];
 const R = 0.09;
 
-export const CHAPTERS: ChapterData[] = [
+export const CHAPTERS: Chapter[] = [
   {
     id: '1', title: '개항과 근대 문물', era: '1870~1890년대', protagonist: 'manbok',
     family: [father, mother], thirdAxis: 'new',
@@ -37,6 +21,7 @@ export const CHAPTERS: ChapterData[] = [
     scenes: [
       {
         id: '1-1', photoAsset: 'scene-1-1', source: [1, 10],
+        autoFlag: 'spoon', // 놋수저는 장면 사건(T09 Ruling) — 1·2장 outro 가 항상 참
         narration: '서양 여러 나라의 배가 조선의 해안에 나타나 통상을 요구했단다. 조선은 처음에 거부했지.',
         dialogue: [
           '"저들이 바라는 건 백성에게 중요한 농산물이야. 교역하면 나라가 망해."',
@@ -45,7 +30,6 @@ export const CHAPTERS: ChapterData[] = [
         choices: [
           { text: '농산물을 빼앗긴다는 어른 말에 고개를 끄덕인다', effects: { family: 0, home: 0, third: -1 } },
           { text: '새 문물을 받아야 발전한다는 어른 말에 고개를 끄덕인다', effects: { family: 0, home: 0, third: 1 } },
-          { text: '놋수저 한 벌을 산다', effects: { family: 0, home: 0, third: 0 }, flag: 'spoon' },
         ],
         back: { type: 'ox', prompt: '조선은 처음에 서양 배의 통상 요구를 받아들였다', answer: false, fix: '조선은 처음에는 통상 요구를 거부했단다.', source: [104] },
       },
@@ -249,6 +233,7 @@ export const CHAPTERS: ChapterData[] = [
         id: '4-1', photoAsset: 'scene-4-1', source: [30, 31, 32],
         narration: '우리 민족의 끊임없는 노력과 연합국의 승리로 1945년 8월 15일 광복을 맞았단다. 15일은 조용했고 16일부터 거리가 만세로 가득 찼지.',
         dialogue: ['담임 선생님이 칠판에 원래 이름을 쓰고 불러 주었다.'],
+        // 색은 4장 이후 그림 에셋에 들어 있음 — 플래그는 결과·저장 기록용
         autoFlag: 'first_color',
         compare: {
           a: 'compare-4-1-before', b: 'compare-4-1-after',

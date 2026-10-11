@@ -3,6 +3,7 @@
 import { useRef } from 'preact/hooks';
 import { bundleDrop, bundlePick } from '../engine';
 import type { Scene, State } from '../types';
+import { ITEM_NAME } from '../components/Kit';
 import note from '../../assets/build/kit/speech-note.webp';
 import grandma from '../../assets/build/kit/portrait-grandma.webp';
 import bundleIcon from '../../assets/build/kit/icon-bundle.webp';
@@ -49,7 +50,7 @@ export function Bundle({ state, scene, src, onChange, onDone }: {
             return (
               <button key={i} type="button" class="key lg abs slot" style={{ left: `${42 + 100 * i}px`, top: '484px' }}
                 disabled={!id} onClick={() => id && apply(bundleDrop(cur.current, id))}>
-                {id && <img src={ITEM[id]} alt={id} />}
+                {id && <img src={ITEM[id]} alt={ITEM_NAME[id]} />}
               </button>
             );
           })}
@@ -60,7 +61,7 @@ export function Bundle({ state, scene, src, onChange, onDone }: {
               <button key={id} type="button" class={taken ? 'key lg abs tile taken' : 'key lg abs tile'} data-item={id}
                 aria-pressed={taken} style={{ left: `${420 + 96 * i}px`, top: '484px' }}
                 onClick={() => apply(bundlePick(cur.current, id))}>
-                <img src={ITEM[id]} alt={id} />
+                <img src={ITEM[id]} alt={ITEM_NAME[id]} />
               </button>
             );
           })}

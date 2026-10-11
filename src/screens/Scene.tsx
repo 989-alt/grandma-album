@@ -16,7 +16,7 @@ type Mood = 'calm' | 'happy' | 'worried';
 // 쪽지 한 장에 다섯 줄(24px·폭 ~290px ≈ 줄당 12자)까지 → 문장 단위로 나눠 50자 안팎씩 묶는다.
 const MAX = 50;
 function pages(scene: SceneT): Page[] {
-  const parts = scene.narration.split(/(?<=[.!?])\s+/).flatMap((s) => {
+  const parts = scene.narration.replace(/([.!?])\s+/g, '$1\n').split('\n').flatMap((s) => {
     if (s.length <= MAX + 10) return [s];
     const cut = s.indexOf(', ', s.length / 3);
     return cut < 0 ? [s] : [s.slice(0, cut + 1), s.slice(cut + 2)];

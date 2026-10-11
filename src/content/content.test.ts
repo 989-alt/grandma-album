@@ -127,13 +127,15 @@ describe('선택·플래그·사건', () => {
     }
   });
 
-  it('플래그: 1-1 spoon, 3-5 spoon_hidden(위험), 4-1 자동 first_color', () => {
-    expect(scene('1-1').choices!.find((c) => c.flag === 'spoon')?.text).toBe('놋수저 한 벌을 산다');
+  it('플래그: 1-1 자동 spoon(카드 2장), 3-5 spoon_hidden(위험), 4-1 자동 first_color', () => {
+    expect(scene('1-1').autoFlag).toBe('spoon');
+    expect(scene('1-1').choices).toHaveLength(2);
+    expect(CONTENT_TEXT).not.toContain('놋수저 한 벌을 산다');
     expect(scene('3-5').choices!.find((c) => c.flag === 'spoon_hidden')).toMatchObject({ text: '놋수저 한 벌을 숨긴다', risk: true });
     expect(scene('4-1').autoFlag).toBe('first_color');
     expect(scene('4-1').choices).toBeUndefined();
     const flagged = ALL_SCENES.flatMap((s) => (s.choices ?? []).filter((c) => c.flag).map((c) => `${s.id}:${c.flag}`));
-    expect(flagged).toEqual(['1-1:spoon', '3-5:spoon_hidden']);
+    expect(flagged).toEqual(['3-5:spoon_hidden']);
     const gated = ALL_SCENES.flatMap((s) => (s.choices ?? []).filter((c) => c.requiresFlag).map((c) => `${s.id}:${c.text}:${c.requiresFlag}`));
     expect(gated).toEqual(['4-3:외가에 놋수저를 보여 드린다:spoon_hidden']);
     expect(scene('4-3').choices!.filter((c) => !c.requiresFlag).length).toBeGreaterThanOrEqual(2);

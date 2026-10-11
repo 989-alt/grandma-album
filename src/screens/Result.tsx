@@ -4,12 +4,13 @@
 import { useEffect, useState } from 'preact/hooks';
 import { CHAPTERS } from '../content';
 import { summarize } from '../engine';
-import type { Chapter, Content, Scene, State } from '../types';
+import type { Content, Scene, State } from '../types';
 import { members } from '../components/Hud';
-import { Btn, IMG, Nameplate, Note, UI } from '../components/Kit';
+import { Btn, IMG, ITEM_NAME, Nameplate, Note, UI } from '../components/Kit';
+import { THUMB } from './Album';
 import { PhotoBack } from '../components/PhotoBack';
 
-const chapters = CHAPTERS as unknown as Chapter[];
+const chapters = CHAPTERS;
 const SPREADS = 3;
 const FLIP_MS = 600;
 const QUESTION = '내가 그때 학생이었다면, 학도병으로 나갔을까?';
@@ -18,10 +19,12 @@ const WORDS = {
   gone: '그 놋수저는 이제 없지만, 이야기는 이 사진첩에 남았단다.',
 };
 
-const label = { position: 'absolute', font: '700 20px/1 var(--font-body)', color: 'var(--muted-foreground)' } as const;
+const label = { position: 'absolute', font: '20px/1 var(--font-body)', color: 'var(--muted-foreground)' } as const;
 const value = { position: 'absolute', font: '28px/1.2 var(--font-display)', color: 'var(--card-foreground)', whiteSpace: 'nowrap' } as const;
 
-export function Result({ content, state, onReplay, onTitle }: { content: Content; state: State; onReplay: () => void; onTitle: () => void }) {
+export function Result({ content, state, onReplay, onTitle, photoSrc }: {
+  content: Content; state: State; onReplay: () => void; onTitle: () => void; photoSrc?: (sceneId: string) => string | undefined;
+}) {
   const [step, setStep] = useState(0);
   const [viewing, setViewing] = useState<Scene | null>(null);
   useEffect(() => {
@@ -53,9 +56,14 @@ export function Result({ content, state, onReplay, onTitle }: { content: Content
       return (
         <>
           <Nameplate left={side ? 666 : 158} top={side ? 96 : 190} text={`${ch.id}장 · ${ch.era}`} />
-          {ch.scenes.map((sc, i) => (
-            <div key={sc.id} class="frame sm abs" style={{ left: x0 + (i % 3) * 144, top: y0 + Math.floor(i / 3) * 116, width: 130, height: 100 }} />
-          ))}
+          {ch.scenes.map((sc, i) => {
+            const src = photoSrc?.(sc.id);
+            return (
+              <div key={sc.id} class="frame sm abs" style={{ left: x0 + (i % 3) * 144, top: y0 + Math.floor(i / 3) * 116, width: 130, height: 100 }}>
+                {src && <img src={src} alt="" style={THUMB} />}
+              </div>
+            );
+          })}
           <img class="abs" src={UI.seal} alt="" style={side ? { left: 896, top: 520, width: 64 } : { left: 388, top: 620, width: 64 }} />
         </>
       );
@@ -105,7 +113,7 @@ export function Result({ content, state, onReplay, onTitle }: { content: Content
       <span style={{ ...label, left: 550, top: 206 }}>물건</span>
       <div data-testid="r-items" class="abs" style={{ left: 550, top: 236, display: 'flex', gap: 12 }}>
         {[0, 1, 2].map((i) => (
-          <div key={i} class="key lg" data-item={items[i] ?? ''}>{items[i] && <img src={IMG[`item-${items[i]}`]} alt={items[i]} />}</div>
+          <div key={i} class="key lg" data-item={items[i] ?? ''}>{items[i] && <img src={IMG[`item-${items[i]}`]} alt={ITEM_NAME[items[i]]} />}</div>
         ))}
         {spoonApart && (
           <>

@@ -3,17 +3,17 @@
 // 3초 무입력이면 반짝이는 빈 칸 옆에 손(icon-hand) 깜빡임, 입력 즉시 제거.
 import { useEffect, useState } from 'preact/hooks';
 import { CHAPTERS, TERMS } from '../content';
-import type { Chapter, Scene, State } from '../types';
+import type { Scene, State } from '../types';
 import { Strip } from '../components/Hud';
 import { Nameplate, UI, Wide } from '../components/Kit';
 import { PhotoBack } from '../components/PhotoBack';
 
-const chapters = CHAPTERS as unknown as Chapter[];
+const chapters = CHAPTERS;
 const SPREADS = 4; // 3 펼침 + 뒤표지
 
 // 작은 틀(테두리 27px) 안 사진: 틀 안 연필선(가장자리 10px)까지 꽉 채우고, 네 모서리는 삼각형으로 잘라 금속 모서리 밑에 끼운 것처럼.
 const C = 'calc(100% - 15px)';
-const THUMB = {
+export const THUMB = {
   position: 'absolute', left: -17, top: -17, width: 'calc(100% + 34px)', height: 'calc(100% + 34px)', objectFit: 'cover',
   clipPath: `polygon(15px 0, ${C} 0, 100% 15px, 100% ${C}, ${C} 100%, 15px 100%, 0 ${C}, 0 15px)`,
 } as const;
@@ -57,7 +57,7 @@ export function Album({ state, onOpen, onTerm, photoSrc }: {
           if (done || (ci + 1 === state.chapter && i < state.sceneIdx)) {
             const src = photoSrc?.(sc.id);
             return (
-              <button key={sc.id} type="button" class="frame sm abs" style={pos} aria-label={`${sc.id} 사진 뒷면 보기`} onClick={() => setViewing(sc as Scene)}>
+              <button key={sc.id} type="button" class="frame sm abs" style={pos} aria-label={`${sc.id} 사진 뒷면 보기`} onClick={() => setViewing(sc)}>
                 {src && <img src={src} alt="" style={THUMB} />}
               </button>
             );

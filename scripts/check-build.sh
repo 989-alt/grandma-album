@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 빌드 검사(PRD §6-5): dist 에 HTML 1개, 8MB(8388608 B) 미만, 외부 URL 0건.
+# 빌드 검사(PRD §6-5): dist 에 HTML 1개, 8MB(8388608 B) 미만, 외부 URL 0건, 금지 문구 0건.
 # Preact 런타임의 XML 네임스페이스 상수(www.w3.org)는 네트워크 요청이 아니라 제외한다.
 cd "$(dirname "$0")/.." || exit 1
 fail=0
@@ -15,5 +15,12 @@ if [ "$size" -ge 8388608 ]; then echo "FAIL 크기: $size B (8388608 B 미만이
 
 urls=$(grep -o 'https\?://[^"'"'"' )>]*' "$f" | grep -v 'www.w3.org' | sort -u)
 if [ -n "$urls" ]; then echo "FAIL 외부 URL:"; echo "$urls" | sed 's/^/     /'; fail=1; else echo "OK   외부 URL: 0"; fi
+
+bad=0
+for w in '전쟁이 끝났' '창씨개명' '공출' '종군 위안부' '흥선대원군'; do
+  c=$(grep -o -F "$w" "$f" | wc -l | tr -d ' ')
+  if [ "$c" -ne 0 ]; then echo "FAIL 금지 문구 \"$w\": $c"; bad=1; fi
+done
+if [ "$bad" -ne 0 ]; then fail=1; else echo "OK   금지 문구: 0"; fi
 
 exit $fail

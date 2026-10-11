@@ -18,7 +18,7 @@ const throwing = () => {
 };
 
 const state = (): State => ({
-  v: 1, chapter: 3, sceneIdx: 2, stats: { family: 2, home: 1, third: 3 },
+  v: 1, chapter: 3, sceneIdx: 0, stats: { family: 2, home: 1, third: 3 },
   family: { father: 'with', brother: 'unknown' },
   flags: { spoon: true, spoon_hidden: false, first_color: false },
   bundle: ['spoon', 'cloth', 'photo'], answers: [{ sceneId: '1-1', correct: true, retried: false }],
@@ -40,9 +40,9 @@ describe('storage', () => {
     expect(ls.length).toBe(1);
     expect(ls.key(0)).toBe('grandma-album/v1');
     expect(st.load().state).toEqual(state());
-    st.save({ ...state(), sceneIdx: 4 });
+    st.save({ ...state(), chapter: 4 });
     expect(ls.length).toBe(1);
-    expect(st.load().state?.sceneIdx).toBe(4);
+    expect(st.load().state?.chapter).toBe(4);
   });
 
   it('clear 후 load 는 null', async () => {
@@ -53,7 +53,8 @@ describe('storage', () => {
     expect(st.load()).toEqual({ state: null, dropped: false });
   });
 
-  it.each(['{"v":1,', 'not json', '', 'null', '42', '"str"', '{}', JSON.stringify({ ...state(), v: 0 }), JSON.stringify({ ...state(), v: 2 }), '{"v":1}', '{"v":1,"chapter":"x"}', JSON.stringify({ ...state(), stats: undefined }), JSON.stringify({ ...state(), flags: null })])(
+  it.each(['{"v":1,', 'not json', '', 'null', '42', '"str"', '{}', JSON.stringify({ ...state(), v: 0 }), JSON.stringify({ ...state(), v: 2 }), '{"v":1}', '{"v":1,"chapter":"x"}', JSON.stringify({ ...state(), stats: undefined }), JSON.stringify({ ...state(), flags: null }),
+    JSON.stringify({ ...state(), chapter: 99 }), JSON.stringify({ ...state(), family: undefined })])(
     '깨진 저장본 %j → 삭제 후 state null, dropped true', async (bad) => {
       const st = await fresh();
       ls.setItem('grandma-album/v1', bad);

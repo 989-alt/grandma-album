@@ -33,6 +33,7 @@ export function Choices({ chapter, scene, state, onChoose }: { chapter: Chapter;
               : KEYS.filter((k) => choice.effects[k]).map((k) => (
                 <span key={k} class="tag"><img src={UI[`icon-${icon[k]}`]} alt="" />{`${label[k]} ${choice.effects[k] > 0 ? '+' : '−'}${Math.abs(choice.effects[k])}`}</span>
               ))}
+            {choice.risk && <span class="tag"><img src={UI['icon-lock']} alt="" />들키면 큰일</span>}
           </span>
           {locked && <img class="lock" src={UI['icon-lock']} alt="잠김" />}
         </button>

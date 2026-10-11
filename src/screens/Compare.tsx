@@ -1,5 +1,6 @@
 // S3' 두 사진 비교(배치 B 두 쪽). 왼쪽 before, 오른쪽 after 를 탭해 다른 곳 찾기.
 // 맞힘 = 그 자리에 stamp-ring 56 + 라벨, 틀림 = 잔물결만(패널티 없음). 1곳 이상 찾으면 '그만 보기', 다 찾으면 자동 진행.
+// 키보드: 스팟마다 투명 버튼(aria-label = 라벨)을 after 위에 겹쳐 Tab·Enter 로도 찾는다.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { compareHit } from '../engine';
 import type { Scene, State } from '../types';
@@ -36,10 +37,11 @@ export function Compare({ state, scene, srcA, srcB, onChange, onDone }: {
   const finish = () => { if (!doneRef.current) { doneRef.current = true; onDone(); } };
 
   const tap = (e: MouseEvent) => {
-    if (foundRef.current.length === spots.length) return;
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width;
-    const y = (e.clientY - r.top) / r.height;
+    hit((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+  };
+  const hit = (x: number, y: number) => {
+    if (foundRef.current.length === spots.length) return;
     const res = compareHit(cur.current, scene, x, y, foundRef.current);
     if (!res.hit) { setRipple({ x, y, k: ++rippleK.current }); return; }
     foundRef.current = [...foundRef.current, res.spotIdx];
@@ -59,6 +61,11 @@ export function Compare({ state, scene, srcA, srcB, onChange, onDone }: {
       <div class="frame abs" style={{ left: '550px', top: '184px', width: '432px', height: '325px' }}>
         <div class="pic" data-testid="after" onClick={tap}>
           {graph ? <Graph graph={graph} upto={graph.years.length} /> : srcB && <img src={srcB} alt="" />}
+          {spots.map((p, i) => (
+            <button key={`k${i}`} type="button" class="spot-key" aria-label={p.label} aria-pressed={found.includes(i)}
+              style={{ left: pct(p.x), top: pct(p.y) }}
+              onClick={(e) => { e.stopPropagation(); if (!foundRef.current.includes(i)) hit(p.x, p.y); }} />
+          ))}
           {found.map((i) => (
             <div key={i}>
               <img class="mark" src={stampRing} alt="" style={{ left: pct(spots[i].x), top: pct(spots[i].y) }} />

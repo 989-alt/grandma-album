@@ -31,7 +31,7 @@ export interface Scene {
   dialogue: string[];
   source: number[];
   choices?: Choice[];
-  /** 장면에 들어오면 켜지는 플래그(4-1 first_color). */
+  /** 장면에 들어오면 켜지는 플래그(1-1 spoon, 4-1 first_color). */
   autoFlag?: keyof Flags;
   /** 선택과 무관한 장면 사건(2-4 삼촌, 5-6 아버지). */
   event?: { setFamily: { id: string; status: FamilyStatus } };

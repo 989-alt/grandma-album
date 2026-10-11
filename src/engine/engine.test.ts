@@ -100,7 +100,7 @@ describe('applyChoice: 효과·클램프·플래그·가족', () => {
   });
   it('setFamily·flag 적용', () => {
     expect(applyChoice(s0(), big(0), 0).state.family.father).toBe('unknown');
-    expect(applyChoice(s0(), scene('1-1'), 2).state.flags.spoon).toBe(true);
+    expect(enterScene(s0(), scene('1-1')).flags.spoon).toBe(true); // 1-1 놋수저 = 장면 사건(T09)
     expect(applyChoice(at(3, 4), scene('3-5'), 0).state.flags.spoon_hidden).toBe(true);
   });
 });

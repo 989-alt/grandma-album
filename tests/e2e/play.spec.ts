@@ -4,6 +4,7 @@ import { ALL_SCENES, CLOSING } from '../../src/content';
 
 const KEY = 'grandma-album/v1';
 const REPORT_PNG = '../harness/state/grandma-album/reports/T06-result.png';
+const T09 = (name: string) => `../harness/state/grandma-album/reports/T09-${name}.png`;
 type Snap = { chapter: number; sceneIdx: number; bgm: string | null };
 /** 장 → 곡(T08): 1 market · 2~3 lamp · 4 dawn · 5~6 winter */
 const BGM_OF: Record<number, string> = { 1: 'market', 2: 'lamp', 3: 'lamp', 4: 'dawn', 5: 'winter', 6: 'winter' };
@@ -105,9 +106,21 @@ test('(a) 완주 — 정답·오답 섞어서, 결과 7항·틀린 문제·닫�
   await sfx(page, '톡'); // 장 시작 저장 자막
   // 초성 오답 1(1-2), O·X 오답 2(1-4, 3-4)
   const wrong = new Set(['1-2', '1-4', '3-4']);
-  const seen = await drive(page, wrong, () => visible(page, '[data-screen="result"]'));
-  expect(seen.closing).toBe(true); // 닫는 장면은 항상
+  const seen = await drive(page, wrong, () => visible(page, '[data-screen="closing"]'));
   expect(seen.retry).toBe(2); // 장당 1개: 1장(1-2), 3장(3-4)
+
+  // 닫는 장면 직전 저장본: 키 1개, v===1, 6장 시작에서 덮어쓴 것
+  const ls = await storage(page);
+  expect(Object.keys(ls)).toEqual([KEY]);
+  const s = JSON.parse(ls[KEY]!);
+  expect(s.v).toBe(1);
+  expect(s).toMatchObject({ chapter: 6, sceneIdx: 0 });
+  for (const k of ['stats', 'family', 'flags', 'bundle', 'answers', 'retryQueue', 'compareHits', 'letterMoods', 'startedAt', 'playMs']) expect(s).toHaveProperty(k);
+  expect(s.bundle).toHaveLength(3);
+  expect(s.letterMoods.length).toBeGreaterThan(0);
+  expect(s.flags.spoon).toBe(true); // 1-1 장면 사건
+
+  expect((await drive(page, wrong, () => visible(page, '[data-screen="result"]'))).closing).toBe(true); // 닫는 장면은 항상
 
   // 결과 7항
   await expect(page.getByTestId('r-time')).toHaveText(/^\d+분$/);
@@ -129,21 +142,13 @@ test('(a) 완주 — 정답·오답 섞어서, 결과 7항·틀린 문제·닫�
   await button(page, '뒤표지').click();
   await expect(page.locator('[data-screen="result"]')).toBeVisible();
 
-  // 저장본: 키 1개, v===1, 6장 시작에서 덮어쓴 것
-  const ls = await storage(page);
-  expect(Object.keys(ls)).toEqual([KEY]);
-  const s = JSON.parse(ls[KEY]!);
-  expect(s.v).toBe(1);
-  expect(s).toMatchObject({ chapter: 6, sceneIdx: 0 });
-  for (const k of ['stats', 'family', 'flags', 'bundle', 'answers', 'retryQueue', 'compareHits', 'letterMoods', 'startedAt', 'playMs']) expect(s).toHaveProperty(k);
-  expect(s.bundle).toHaveLength(3);
-  expect(s.letterMoods.length).toBeGreaterThan(0);
-
-  // 타이틀 = 저장 유지
+  // 완주(결과 진입) = 저장 삭제 → 타이틀에서 '이어하기' 없이 새로 시작
+  expect(await page.evaluate(() => localStorage.length)).toBe(0);
   await button(page, '타이틀').click();
   await expect(button(page, '사진첩 열기')).toBeVisible();
-  expect(Object.keys(await storage(page))).toEqual([KEY]);
   expect((await snap(page)).bgm).toBeNull();
+  await button(page, '사진첩 열기').click();
+  await expect(page.getByRole('button', { name: '1-1 사진 붙이기' })).toBeVisible();
   expect(errors).toEqual([]); // 자동재생 차단 등 콘솔 에러 0
 });
 
@@ -178,4 +183,41 @@ test('(d) 틀린 문제 0 → "모두 맞았어요"', async ({ page }) => {
   await page.goto('/?screen=result&perfect=1');
   await expect(page.getByTestId('r-wrong')).toHaveText('모두 맞았어요');
   await expect(page.getByTestId('r-rate')).toHaveText('100% (30/30)');
+});
+
+test('(e) 키보드만으로 비교 1장면 — Tab·Enter', async ({ page }) => {
+  await page.goto('/?screen=scene&id=1-3');
+  await drive(page, new Set(), () => visible(page, '.screen-compare')); // 비교 화면까지는 클릭으로
+  const focused = () => page.evaluate(() => document.activeElement?.className ?? '');
+  for (let i = 0; i < 10 && !(await focused()).includes('spot-key'); i++) await page.keyboard.press('Tab');
+  expect(await focused()).toContain('spot-key');
+  await page.keyboard.press('Enter');
+  await expect(button(page, '그만 보기')).toBeEnabled();
+  await sfx(page, '띵');
+  await expect(page.locator('.screen-compare .spot-label')).toHaveCount(1);
+  await page.keyboard.press('Tab'); // 다음 스팟 — 포커스 링 보임
+  await page.screenshot({ path: T09('compare-focus') });
+  for (let i = 0; i < 10 && (await page.evaluate(() => document.activeElement?.textContent)) !== '그만 보기'; i++) await page.keyboard.press('Tab');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.screen-compare')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '1-4 사진 붙이기' })).toBeVisible();
+});
+
+test('(f) 깨진 저장본(chapter 99) → 타이틀 정상 + 토스트, 저장 삭제', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ v: 1, chapter: 99, sceneIdx: 0, stats: { family: 2, home: 2, third: 1 }, flags: {} })), KEY);
+  await page.reload();
+  await expect(button(page, '사진첩 열기')).toBeVisible();
+  await expect(page.getByText('저장된 사진첩을 열 수 없어 처음부터 시작해요')).toBeVisible();
+  expect(await page.evaluate(() => localStorage.length)).toBe(0);
+});
+
+test('(g) 1366×700 창 — 무대가 맞춰 줄어 하단 \'다음\' 버튼까지 보임', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 700 });
+  await page.goto('/?screen=scene&id=1-1');
+  const b = (await button(page, '다음').boundingBox())!;
+  expect(b.y).toBeGreaterThanOrEqual(0);
+  expect(b.y + b.height).toBeLessThanOrEqual(700);
+  expect(b.x + b.width).toBeLessThanOrEqual(1366);
+  await page.screenshot({ path: T09('scene-1366x700') });
 });

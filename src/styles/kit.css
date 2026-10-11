@@ -30,7 +30,7 @@ button { margin: 0; padding: 0; background: none; font: inherit; color: inherit;
         filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--background) 45%, transparent)); }
 /* nameplate → slice 80, 24px, 높이 48 */
 .nameplate { position: relative; border: 24px solid transparent; border-image: url('../../assets/build/kit/nameplate.webp') 80 fill / 24px stretch; height: 48px; }
-.nameplate > span { position: absolute; left: -24px; right: -24px; top: 0; text-align: center; font: 700 16px/1 var(--font-body); color: var(--card-foreground); transform: translateY(-50%); white-space: nowrap; }
+.nameplate > span { position: absolute; left: -24px; right: -24px; top: 0; text-align: center; font: 16px/1 var(--font-body); color: var(--card-foreground); transform: translateY(-50%); white-space: nowrap; }
 /* key-square / key-wide → slice 60, 13px */
 .key { position: relative; width: 64px; height: 64px; border: 13px solid transparent; border-image: url('../../assets/build/kit/key-square.webp') 60 fill / 13px stretch; cursor: pointer; }
 .key.wide { width: 160px; border-image-source: url('../../assets/build/kit/key-wide.webp'); }
@@ -75,8 +75,8 @@ button { margin: 0; padding: 0; background: none; font: inherit; color: inherit;
 .card.locked .text { color: var(--locked); }
 .card.locked .lock { position: absolute; right: -24px; top: -26px; width: 44px; }
 /* 태그 = CSS (허용 범위) */
-.tag { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border: 2px solid var(--card-foreground); border-radius: var(--radius-sm);
-       background: var(--photo-frame); font: 700 14px/1 var(--font-body); color: var(--card-foreground); }
+.tag { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 2px solid var(--card-foreground); border-radius: var(--radius-sm);
+       background: var(--photo-frame); font: 16px/1 var(--font-body); color: var(--card-foreground); }
 .tag img { width: 18px; height: 18px; object-fit: contain; }
 .tag.locked { border-color: var(--locked); color: var(--muted-foreground); background: var(--surface-slot); }
 
@@ -113,7 +113,6 @@ button { margin: 0; padding: 0; background: none; font: inherit; color: inherit;
 .stamp { position: absolute; width: 110px; transform: rotate(-8deg); animation: stamp .3s ease-out; }
 @keyframes stamp { from { transform: rotate(-8deg) scale(1.6); opacity: 0; } to { transform: rotate(-8deg) scale(1); opacity: 1; } }
 .keys { display: flex; flex-wrap: wrap; gap: 16px; width: 464px; }
-.caption { font: 20px/1 var(--font-hand); color: var(--muted-foreground); }
 
 /* ── 모션: 인화 1.2초, 3초 무입력 손 깜빡임 ── */
 .frame.printing { animation: print 1.2s ease-out; }
@@ -130,7 +129,6 @@ button { margin: 0; padding: 0; background: none; font: inherit; color: inherit;
 /* 낱말 주머니 */
 .terms { display: flex; flex-wrap: wrap; gap: 8px; width: 432px; }
 .meaning { font: 24px/1.45 var(--font-display); color: var(--card-foreground); word-break: keep-all; }
-.title { margin: 0; font: 700 56px/1.2 var(--font-display); color: var(--card-foreground); text-align: center; }
 
 /* 포커스 링(허용 CSS) */
 .btn:focus-visible, .card:focus-visible, .key:focus-visible, .frame:focus-visible, .slot:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }

@@ -67,7 +67,7 @@ const fire = (target: N, type: string, force = false) => act(() => {
 const html = (n: N): string => n.nodeType === 3 ? n.data
   : `<${n.localName}${Object.entries(n.attrs).filter(([k]) => k !== 'style').map(([k, v]) => ` ${k}="${k === 'src' ? v.slice(v.lastIndexOf('/') + 1) : v}"`).join('')}>${n.childNodes.map(html).join('')}</${n.localName}>`;
 
-const ch = (i: number) => CHAPTERS[i - 1] as unknown as Chapter;
+const ch = (i: number): Chapter => CHAPTERS[i - 1];
 const scene = (id: string) => ch(Number(id[0])).scenes.find((s) => s.id === id)! as Scene;
 const at = (id: string, patch: Partial<State> = {}): State => ({ ...initialState(0), chapter: Number(id[0]), sceneIdx: Number(id.slice(2)) - 1, ...patch });
 
@@ -115,6 +115,22 @@ describe('T04 edge_cases', () => {
     expect(all(cls('note'))[0].textContent).toBe(ox.back.type === 'ox' ? ox.back.fix : '');
     fire(all(text('다음 사진'))[0], 'click');
     expect(next2).toHaveBeenCalledTimes(1);
+  });
+
+  it('2b. 채워진 빈칸 탭 → 마지막 글자 빼기(판정 전), 다시 채우면 판정', () => {
+    const sc = scene('3-3');
+    const judge = vi.fn((a: string[] | boolean) => answerBack(at('3-3'), sc, a).correct);
+    mount(<PhotoBack scene={sc} judge={judge} onNext={() => {}} />);
+    fire(all(text('수'))[0], 'click');
+    const filled = () => all(cls('filled'));
+    expect(filled().map((n) => n.textContent)).toEqual(['수']);
+    fire(filled()[0], 'click');
+    expect(filled()).toHaveLength(0);
+    expect('disabled' in all(text('수'))[0].attrs).toBe(false); // 뺀 열쇠는 다시 누를 수 있다
+    fire(all(text('신'))[0], 'click');
+    fire(all(text('사'))[0], 'click');
+    expect(judge).toHaveBeenCalledTimes(1);
+    expect(judge).toHaveBeenCalledWith(['신', '사']);
   });
 
   it('3. 색엔 모양·글자 병기: 정답 = 또렷 + ✓ 도장, 오답 = 흐림 + ✗ 도장', () => {

@@ -16,8 +16,6 @@ export const KIT: Record<string, string> = glob(import.meta.glob(
 
 export type BgmId = 'market' | 'lamp' | 'dawn' | 'winter';
 export const BGM = glob(import.meta.glob('../assets/build/bgm/*.mp3', { eager: true, import: 'default' }) as Record<string, string>) as Record<BgmId, string>;
-/** 장 → 곡: 1장 market, 2~3장 lamp, 4장 dawn, 5~6장 winter */
-export const CHAPTER_BGM: Record<number, BgmId> = { 1: 'market', 2: 'lamp', 3: 'lamp', 4: 'dawn', 5: 'winter', 6: 'winter' };
 
 /** 효과음은 소리 없이 자막만(Gemini 생성 경로 미확정). */
 export const SFX_CAPTIONS = [

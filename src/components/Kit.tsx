@@ -31,10 +31,24 @@ export function Wide({ label, onClick, left, top }: { label: string; onClick: ()
   );
 }
 
-// 교과서 용어(낱말 주머니 낱말) 강조. 긴 낱말 먼저.
-const TERM_RE = new RegExp(`(${TERMS.map((t) => t.word).sort((a, b) => b.length - a.length).join('|')})`);
+/** 보따리 물건 id → 이름(img alt). */
+export const ITEM_NAME: Record<string, string> = { spoon: '놋수저', bundle: '보자기', book: '책', radish: '무 바구니', photo: '사진', medicine: '약병' };
+
+// 교과서 용어(낱말 주머니 낱말) 강조. 긴 낱말 먼저. 앞뒤가 둘 다 한글 음절이면 더 긴 낱말의 일부('한국광복군' 안의 '광복')라 강조하지 않는다.
+const TERM_RE = new RegExp(TERMS.map((t) => t.word).sort((a, b) => b.length - a.length).join('|'), 'g');
+const SYL = /[가-힣]/;
 export function emphasize(text: string): ComponentChildren {
-  return text.split(TERM_RE).map((part, i) => (i % 2 ? <b key={i}>{part}</b> : part));
+  const out: ComponentChildren[] = [];
+  let at = 0;
+  for (const m of text.matchAll(TERM_RE)) {
+    const a = m.index!;
+    const b = a + m[0].length;
+    if (SYL.test(text[a - 1] ?? '') && SYL.test(text[b] ?? '')) continue;
+    out.push(text.slice(at, a), <b key={a}>{m[0]}</b>);
+    at = b;
+  }
+  out.push(text.slice(at));
+  return out;
 }
 
 /** 쪽지(speech-note 통짜 img). 수치 = 2-세피아-gen.py note(): 원 액자 (201,212) r148, 글 x ≥ (376·s)+14. */
